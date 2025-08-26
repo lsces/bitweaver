@@ -1,126 +1,108 @@
 [submodule "kernel"]
 	path = kernel
-	url = git@github.com:bitweaver/kernel.git
+	url = git@github.com:lsces/kernel.git
 [submodule "languages"]
 	path = languages
-	url = git@github.com:bitweaver/languages.git
+	url = git@github.com:lsces/languages.git
 [submodule "liberty"]
 	path = liberty
-	url = git@github.com:bitweaver/liberty.git
+	url = git@github.com:lsces/liberty.git
 [submodule "storage"]
 	path = storage
-	url = git@github.com:bitweaver/storage.git
+	url = git@github.com:lsces/storage.git
 [submodule "temp"]
 	path = temp
-	url = git@github.com:bitweaver/temp.git
+	url = git@github.com:temp/temp.git
 [submodule "themes"]
 	path = themes
-	url = git@github.com:bitweaver/themes.git
+	url = git@github.com:lsces/themes.git
 [submodule "users"]
 	path = users
-	url = git@github.com:bitweaver/users.git
+	url = git@github.com:lsces/users.git
 [submodule "util"]
 	path = util
-	url = git@github.com:bitweaver/util.git
+	url = git@github.com:lsces/util.git
 [submodule "config/iconsets/tango"]
 	path = config/iconsets/tango
-	url = git@github.com:bitweaver/iconset_tango.git
-[submodule "config/iconsets/gnome"]
-	path = config/iconsets/gnome
-	url = git@github.com:bitweaver/iconset_gnome.git
-[submodule "config/iconsets/gorilla"]
-	path = config/iconsets/gorilla
-	url = git@github.com:bitweaver/iconset_gorilla.git
-[submodule "config/iconsets/highcontrast"]
-	path = config/iconsets/highcontrast
-	url = git@github.com:bitweaver/iconset_highcontrast.git
+	url = git@github.com:lsces/iconset_tango.git
 [submodule "blogs"]
 	path = blogs
-	url = git@github.com:bitweaver/blogs.git
+	url = git@github.com:lsces/blogs.git
 [submodule "bnspell"]
 	path = bnspell
-	url = git@github.com:bitweaver/bnspell.git
+	url = git@github.com:lsces/bnspell.git
 [submodule "forums"]
 	path = forums
-	url = git@github.com:bitweaver/boards.git
+	url = git@github.com:lsces/boards.git
 [submodule "calendar"]
 	path = calendar
-	url = git@github.com:bitweaver/calendar.git
+	url = git@github.com:lsces/calendar.git
 [submodule "feed"]
 	path = feed
-	url = git@github.com:bitweaver/feed.git
+	url = git@github.com:lsces/feed.git
 [submodule "photos"]
 	path = photos
-	url = git@github.com:bitweaver/fisheye.git
+	url = git@github.com:lsces/fisheye.git
 [submodule "search"]
 	path = search
-	url = git@github.com:bitweaver/ilike.git
+	url = git@github.com:lsces/search.git
 [submodule "messages"]
 	path = messages
-	url = git@github.com:bitweaver/messages.git
+	url = git@github.com:lsces/messages.git
 [submodule "newsletters"]
 	path = newsletters
-	url = git@github.com:bitweaver/newsletters.git
+	url = git@github.com:lsces/newsletters.git
 [submodule "nexus"]
 	path = nexus
-	url = git@github.com:bitweaver/nexus.git
+	url = git@github.com:lsces/nexus.git
 [submodule "pigeonholes"]
 	path = pigeonholes
-	url = git@github.com:bitweaver/pigeonholes.git
-[submodule "quicktags"]
-	path = quicktags
-	url = git@github.com:bitweaver/quicktags.git
+	url = git@github.com:lsces/pigeonholes.git
 [submodule "rss"]
 	path = rss
-	url = git@github.com:bitweaver/rss.git
-[submodule "sharethis"]
-	path = sharethis
-	url = git@github.com:bitweaver/sharethis.git
-[submodule "smileys"]
-	path = smileys
-	url = git@github.com:bitweaver/smileys.git
-[submodule "stars"]
-	path = stars
-	url = git@github.com:bitweaver/stars.git
+	url = git@github.com:lsces/rss.git
 [submodule "stats"]
 	path = stats
-	url = git@github.com:bitweaver/stats.git
+	url = git@github.com:lsces/stats.git
 [submodule "downloads"]
 	path = downloads
-	url = git@github.com:bitweaver/treasury.git
+	url = git@github.com:lsces/treasury.git
 [submodule "wiki"]
 	path = wiki
-	url = git@github.com:bitweaver/wiki.git
+	url = git@github.com:lsces/wiki.git
 [submodule "install"]
 	path = install
-	url = git@github.com:bitweaver/install.git
+	url = git@github.com:lsces/install.git
 [submodule "gatekeeper"]
 	path = gatekeeper
-	url = git@github.com:bitweaver/gatekeeper.git
+	url = git@github.com:lsces/gatekeeper.git
 [submodule "quota"]
 	path = quota
-	url = git@github.com:bitweaver/quota.git
+	url = git@github.com:lsces/quota.git
 [submodule "tags"]
 	path = tags
-	url = git@github.com:bitweaver/tags.git
+	url = git@github.com:lsces/tags.git
 [submodule "config/themes/bootstrap"]
 	path = config/themes/bootstrap
-	url = git@github.com:bitweaver/theme_bootstrap.git
-[submodule "config/externals/adodb"]
-	path = config/externals/adodb
-	url = git@github.com:bitweaver/adodb.git
-[submodule "config/themes/journal"]
-	path = config/themes/journal
-	url = git@github.com:bitweaver/theme_journal.git
-[submodule "config/themes/slate"]
-	path = config/themes/slate
-	url = git@github.com:bitweaver/theme_slate.git
-[submodule "config/themes/cerulean"]
-	path = config/themes/cerulean
-	url = git@github.com:bitweaver/theme_cerulean.git
-[submodule "config/themes/quickstart"]
-	path = config/themes/quickstart
-	url = git@github.com:bitweaver/theme_quickstart.git
-[submodule "config/externals/smarty"]
-	path = config/externals/smarty
-	url = git://github.com/bitweaver/smarty.git
+	url = git@github.com:lsces/theme_bootstrap.git
+[submodule "contact"]
+	path = contact
+	url = git@github.com:lsces/contact.git
+[submodule "protector"]
+	path = protector
+	url = git@github.com:lsces/protector.git
+[submodule "external/adodb"]
+	path = external/adodb
+	url = https://github.com/lsces/adodb.git
+[submodule "external/smarty"]
+	path = external/smarty
+	url = https://github.com/lsces/smarty.git
+[submodule "external/bootstrap"]
+	path = external/bootstrap
+	url = https://github.com/lsces/bootstrap.git
+[submodule "config/themes/colourstrap"]
+	path = config/themes/colourstrap
+	url = https://github.com/lsces/theme_colourstrap.git
+[submodule "external/silk"]
+	path = external/silk
+	url = https://github.com/lsces/famfamfam-silk.git
