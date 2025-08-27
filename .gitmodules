@@ -94,6 +94,9 @@
 [submodule "external/adodb"]
 	path = external/adodb
 	url = https://github.com/lsces/adodb.git
+[submodule "external/smarty"]
+	path = external/smarty
+	url = https://github.com/lsces/smarty.git
 [submodule "external/bootstrap"]
 	path = external/bootstrap
 	url = https://github.com/lsces/bootstrap.git
