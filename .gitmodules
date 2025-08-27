@@ -22,17 +22,14 @@
 [submodule "util"]
 	path = util
 	url = git@github.com:lsces/util.git
-[submodule "config/iconsets/tango"]
-	path = config/iconsets/tango
-	url = git@github.com:lsces/iconset_tango.git
 [submodule "blogs"]
 	path = blogs
 	url = git@github.com:lsces/blogs.git
 [submodule "bnspell"]
 	path = bnspell
 	url = git@github.com:lsces/bnspell.git
-[submodule "forums"]
-	path = forums
+[submodule "boards"]
+	path = boards
 	url = git@github.com:lsces/boards.git
 [submodule "calendar"]
 	path = calendar
@@ -40,12 +37,12 @@
 [submodule "feed"]
 	path = feed
 	url = git@github.com:lsces/feed.git
-[submodule "photos"]
-	path = photos
+[submodule "fisheye"]
+	path = fisheye
 	url = git@github.com:lsces/fisheye.git
-[submodule "search"]
-	path = search
-	url = git@github.com:lsces/search.git
+[submodule "gatekeeper"]
+	path = gatekeeper
+	url = git@github.com:lsces/gatekeeper.git
 [submodule "messages"]
 	path = messages
 	url = git@github.com:lsces/messages.git
@@ -61,12 +58,12 @@
 [submodule "rss"]
 	path = rss
 	url = git@github.com:lsces/rss.git
+[submodule "search"]
+	path = search
+	url = git@github.com:lsces/search.git
 [submodule "stats"]
 	path = stats
 	url = git@github.com:lsces/stats.git
-[submodule "downloads"]
-	path = downloads
-	url = git@github.com:lsces/treasury.git
 [submodule "wiki"]
 	path = wiki
 	url = git@github.com:lsces/wiki.git
@@ -82,6 +79,12 @@
 [submodule "tags"]
 	path = tags
 	url = git@github.com:lsces/tags.git
+[submodule "config/iconsets/tango"]
+	path = config/iconsets/tango
+	url = git@github.com:lsces/iconset_tango.git
+[submodule "config/themes/colourstrap"]
+	path = config/themes/colourstrap
+	url = git@github.com/lsces/theme_colourstrap.git
 [submodule "config/themes/bootstrap"]
 	path = config/themes/bootstrap
 	url = git@github.com:lsces/theme_bootstrap.git
@@ -91,18 +94,15 @@
 [submodule "protector"]
 	path = protector
 	url = git@github.com:lsces/protector.git
-[submodule "external/adodb"]
-	path = external/adodb
-	url = https://github.com/lsces/adodb.git
-[submodule "external/smarty"]
-	path = external/smarty
-	url = https://github.com/lsces/smarty.git
-[submodule "external/bootstrap"]
-	path = external/bootstrap
-	url = https://github.com/lsces/bootstrap.git
-[submodule "config/themes/colourstrap"]
-	path = config/themes/colourstrap
-	url = https://github.com/lsces/theme_colourstrap.git
-[submodule "external/silk"]
-	path = external/silk
-	url = https://github.com/lsces/famfamfam-silk.git
+[submodule "externals/adodb"]
+	path = externals/adodb
+	url = git@github.com/lsces/adodb.git
+[submodule "externals/smarty"]
+	path = externals/smarty
+	url = git@github.com/lsces/smarty.git
+[submodule "externals/bootstrap"]
+	path = externals/bootstrap
+	url = git@github.com/lsces/bootstrap.git
+[submodule "externals/silk"]
+	path = externals/silk
+	url = git@github.com/lsces/famfamfam-silk.git
