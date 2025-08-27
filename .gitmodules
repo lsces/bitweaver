@@ -94,9 +94,6 @@
 [submodule "protector"]
 	path = protector
 	url = git@github.com:lsces/protector.git
-[submodule "kernel/adodb"]
-	path = kernel/adodb
-	url = git@github.com/lsces/adodb.git
 [submodule "externals/adodb"]
 	path = externals/adodb
 	url = git@github.com/lsces/adodb.git
