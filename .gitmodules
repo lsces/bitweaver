@@ -46,7 +46,7 @@
 	branch = Bitweaver5
 [submodule "fisheye"]
 	path = fisheye
-	url = https://github.com:lsces/fisheye.git
+	url = https://github.com/lsces/fisheye.git
 [submodule "gatekeeper"]
 	path = gatekeeper
 	url = https://github.com:lsces/gatekeeper.git
@@ -107,19 +107,22 @@
 	url = https://github.com:lsces/theme_bootstrap.git
 [submodule "contact"]
 	path = contact
-	url = https://github.com:lsces/contact.git
+	url = https://github.com/lsces/contact.git
 [submodule "protector"]
 	path = protector
-	url = https://github.com:lsces/protector.git
+	url = https://github.com/lsces/protector.git
 [submodule "externals/adodb"]
 	path = externals/adodb
-	url = https://github.com:lsces/adodb.git
+	url = https://github.com/lsces/adodb.git
 [submodule "externals/smarty"]
 	path = externals/smarty
-	url = https://github.com:lsces/smarty.git
+	url = https://github.com/lsces/smarty.git
 [submodule "externals/bootstrap"]
 	path = externals/bootstrap
-	url = https://github.com:lsces/bootstrap.git
+	url = https://github.com/lsces/bootstrap.git
 [submodule "externals/silk"]
 	path = externals/silk
 	url = https://github.com:lsces/famfamfam-silk.git
+[submodule "externals/famfamfam-silk"]
+	path = externals/famfamfam-silk
+	url = https://github.com/lsces/famfamfam-silk.git
