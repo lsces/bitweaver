@@ -30,6 +30,7 @@
 [submodule "blogs"]
 	path = blogs
 	url = https://github.com:lsces/blogs.git
+	branch = Bitweaver5
 [submodule "bnspell"]
 	path = bnspell
 	url = https://github.com:lsces/bnspell.git
@@ -47,6 +48,7 @@
 [submodule "fisheye"]
 	path = fisheye
 	url = https://github.com/lsces/fisheye.git
+	branch = Bitweaver5
 [submodule "gatekeeper"]
 	path = gatekeeper
 	url = https://github.com:lsces/gatekeeper.git
@@ -114,9 +116,11 @@
 [submodule "externals/adodb"]
 	path = externals/adodb
 	url = https://github.com/lsces/adodb.git
+	branch = v5.22.08
 [submodule "externals/smarty"]
 	path = externals/smarty
 	url = https://github.com/lsces/smarty.git
+	branch = v5.4.5
 [submodule "externals/bootstrap"]
 	path = externals/bootstrap
 	url = https://github.com/lsces/bootstrap.git
