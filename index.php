@@ -3,10 +3,14 @@
  * @version $Header$
  * @package bitweaver
  */
-require_once( 'kernel/includes/setup_inc.php' );
+namespace Bitweaver;
+use Bitweaver\Liberty\LibertyBase;
+use Bitweaver\KernelTools;
+
+require_once 'kernel/includes/setup_inc.php';
 
 if( !$gBitSystem->isDatabaseValid() ) {
-	install_error();
+	KernelTools::install_error();
 } elseif( !$gBitSystem->getActivePackage() ) {
 	$bit_index = $gBitSystem->getConfig( 'bit_index' );
 	if( in_array( $bit_index, array_keys( $gBitSystem->mPackages )) && defined( strtoupper( $bit_index ).'_PKG_PATH' )) {
@@ -27,10 +31,10 @@ if( !empty( $_REQUEST['content_id'] )) {
 			}
 			$url .= 'highlight='.$_REQUEST['highlight'];
 		}
-		bit_redirect( $url );
+		KernelTools::bit_redirect( $url );
 	}
 } elseif( !empty( $_REQUEST['structure_id'] )) {
-	include( LIBERTY_PKG_PATH.'display_structure_inc.php' );
+	include LIBERTY_PKG_PATH.'display_structure_inc.php';
 	die;
 }
 
@@ -38,8 +42,8 @@ $gBitThemes->loadLayout();
 // Redirectless home for packages
 if( !empty( $bit_index )) {
 	chdir( $gBitSystem->mPackages[$bit_index]['path'] );
-	include_once( './index.php' );
-die;
+	include_once './index.php';
+	die;
 }
 
-bit_redirect( $gBitSystem->getDefaultPage() );
+KernelTools::bit_redirect( $gBitSystem->getDefaultPage() );
