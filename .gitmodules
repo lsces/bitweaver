@@ -1,7 +1,3 @@
-[submodule "kernel"]
-	path = kernel
-	url = https://github.com:lsces/kernel.git
-	branch = Bitweaver5
 [submodule "languages"]
 	path = languages
 	url = https://github.com:lsces/languages.git
@@ -131,3 +127,6 @@
 [submodule "externals/famfamfam-silk"]
 	path = externals/famfamfam-silk
 	url = https://github.com/lsces/famfamfam-silk.git
+[submodule "kernel"]
+	path = kernel
+	url = https://github.com/lsces/kernel.git
