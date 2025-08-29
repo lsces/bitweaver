@@ -1,11 +1,9 @@
 [submodule "languages"]
 	path = languages
 	url = https://github.com:lsces/languages.git
-	branch = Bitweaver5
 [submodule "liberty"]
 	path = liberty
 	url = https://github.com:lsces/liberty.git
-	branch = Bitweaver5
 [submodule "storage"]
 	path = storage
 	url = https://github.com:lsces/storage.git
@@ -15,7 +13,6 @@
 [submodule "themes"]
 	path = themes
 	url = https://github.com:lsces/themes.git
-	branch = Bitweaver5
 [submodule "users"]
 	path = users
 	url = https://github.com:lsces/users.git
@@ -26,7 +23,6 @@
 [submodule "blogs"]
 	path = blogs
 	url = https://github.com:lsces/blogs.git
-	branch = Bitweaver5
 [submodule "bnspell"]
 	path = bnspell
 	url = https://github.com:lsces/bnspell.git
@@ -36,65 +32,51 @@
 [submodule "calendar"]
 	path = calendar
 	url = https://github.com:lsces/calendar.git
-	branch = Bitweaver5
 [submodule "feed"]
 	path = feed
 	url = https://github.com:lsces/feed.git
-	branch = Bitweaver5
 [submodule "fisheye"]
 	path = fisheye
 	url = https://github.com/lsces/fisheye.git
 [submodule "gatekeeper"]
 	path = gatekeeper
 	url = https://github.com:lsces/gatekeeper.git
-	branch = Bitweaver5
 [submodule "messages"]
 	path = messages
 	url = https://github.com:lsces/messages.git
-	branch = Bitweaver5
 [submodule "newsletters"]
 	path = newsletters
 	url = https://github.com:lsces/newsletters.git
-	branch = Bitweaver5
 [submodule "nexus"]
 	path = nexus
 	url = https://github.com:lsces/nexus.git
-	branch = Bitweaver5
 [submodule "pigeonholes"]
 	path = pigeonholes
 	url = https://github.com:lsces/pigeonholes.git
-	branch = Bitweaver5
 [submodule "rss"]
 	path = rss
 	url = https://github.com:lsces/rss.git
-	branch = Bitweaver5
 [submodule "search"]
 	path = search
 	url = https://github.com:lsces/search.git
-	branch = Bitweaver5
 [submodule "stats"]
 	path = stats
 	url = https://github.com:lsces/stats.git
-	branch = Bitweaver5
 [submodule "wiki"]
 	path = wiki
 	url = https://github.com:lsces/wiki.git
-	branch = Bitweaver5
 [submodule "install"]
 	path = install
 	url = https://github.com:lsces/install.git
 [submodule "gatekeeper"]
 	path = gatekeeper
 	url = https://github.com:lsces/gatekeeper.git
-	branch = Bitweaver5
 [submodule "quota"]
 	path = quota
 	url = https://github.com/lsces/quota.git
-	branch = Bitweaver5
 [submodule "tags"]
 	path = tags
 	url = https://github.com:lsces/tags.git
-	branch = Bitweaver5
 [submodule "config/iconsets/tango"]
 	path = config/iconsets/tango
 	url = https://github.com:lsces/iconset_tango.git
