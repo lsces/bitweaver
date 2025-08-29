@@ -48,7 +48,6 @@
 [submodule "fisheye"]
 	path = fisheye
 	url = https://github.com/lsces/fisheye.git
-	branch = Bitweaver5
 [submodule "gatekeeper"]
 	path = gatekeeper
 	url = https://github.com:lsces/gatekeeper.git
