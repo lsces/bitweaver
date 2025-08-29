@@ -13,10 +13,6 @@
 [submodule "themes"]
 	path = themes
 	url = https://github.com:lsces/themes.git
-[submodule "users"]
-	path = users
-	url = https://github.com:lsces/users.git
-	branch = Bitweaver5
 [submodule "util"]
 	path = util
 	url = https://github.com:lsces/util.git
@@ -112,3 +108,6 @@
 [submodule "kernel"]
 	path = kernel
 	url = https://github.com/lsces/kernel.git
+[submodule "users"]
+	path = users
+	url = https://github.com/lsces/users.git
