@@ -60,6 +60,7 @@
 [submodule "newsletters"]
 	path = newsletters
 	url = https://github.com:lsces/newsletters.git
+	branch = Bitweaver5
 [submodule "nexus"]
 	path = nexus
 	url = https://github.com:lsces/nexus.git
@@ -93,7 +94,8 @@
 	branch = Bitweaver5
 [submodule "quota"]
 	path = quota
-	url = https://github.com:lsces/quota.git
+	url = https://github.com/lsces/quota.git
+	branch = Bitweaver5
 [submodule "tags"]
 	path = tags
 	url = https://github.com:lsces/tags.git
