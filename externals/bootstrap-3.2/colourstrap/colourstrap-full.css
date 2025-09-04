@@ -7243,7 +7243,7 @@ button.close {
 	margin-right: .3em;
 	line-height: 16px;
 	vertical-align: text-top;
-	background-image: url("/external/bootstrap-3.2/colourstrap/silk-sprite.png");
+	background-image: url("/externals/bootstrap-3.2/colourstrap/silk-sprite.png");
 	background-position: 16px 16px;
 	background-repeat: no-repeat;
 }
@@ -7267,7 +7267,7 @@ button.close {
 .dropdown-submenu:focus>a>[class^="icon-"],
 .dropdown-submenu:hover>a>[class*=" icon-"],
 .dropdown-submenu:focus>a>[class*=" icon-"] {
-	background-image: url("/external/bootstrap-3.2/colourstrap/silk-sprit.png");
+	background-image: url("/externals/bootstrap-3.2/colourstrap/silk-sprit.png");
 }
 
 .icon-accept,
@@ -13394,8 +13394,8 @@ icon-hdd {
  */
 @font-face {
 	font-family: 'FontAwesome';
-	src: url('	/external/bootstrap-3.2/font-awesome/fontawesome-webfont.eot?v=4.6.1');
-	src: url('/external/bootstrap-3.2/font-awesome/fontawesome-webfont.eot?#iefix&v=4.6.1') format('embedded-opentype'), url('/external/bootstrap-3.2/font-awesome/fontawesome-webfont.woff2?v=4.6.1') format('woff2'), url('/external/bootstrap-3.2/font-awesome/fontawesome-webfont.woff?v=4.6.1') format('woff'), url('/external/bootstrap-3.2/font-awesome/fontawesome-webfont.ttf?v=4.6.1') format('truetype'), url('/external/bootstrap-3.2/font-awesome/fontawesome-webfont.svg?v=4.6.1#fontawesomeregular') format('svg');
+	src: url('	/externals/bootstrap-3.2/font-awesome/fontawesome-webfont.eot?v=4.6.1');
+	src: url('/externals/bootstrap-3.2/font-awesome/fontawesome-webfont.eot?#iefix&v=4.6.1') format('embedded-opentype'), url('/externals/bootstrap-3.2/font-awesome/fontawesome-webfont.woff2?v=4.6.1') format('woff2'), url('/externals/bootstrap-3.2/font-awesome/fontawesome-webfont.woff?v=4.6.1') format('woff'), url('/externals/bootstrap-3.2/font-awesome/fontawesome-webfont.ttf?v=4.6.1') format('truetype'), url('/externals/bootstrap-3.2/font-awesome/fontawesome-webfont.svg?v=4.6.1#fontawesomeregular') format('svg');
 	font-weight: normal;
 	font-style: normal
 }
