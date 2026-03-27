@@ -1,87 +1,87 @@
 [submodule "languages"]
 	path = languages
-	url = https://github.com:lsces/languages.git
+	url = https://github.com/lsces/languages.git
 [submodule "liberty"]
 	path = liberty
-	url = https://github.com:lsces/liberty.git
+	url = https://github.com/lsces/liberty.git
 [submodule "storage"]
 	path = storage
-	url = https://github.com:lsces/storage.git
+	url = https://github.com/lsces/storage.git
 [submodule "temp"]
 	path = temp
-	url = https://github.com:temp/temp.git
+	url = https://github.com/temp/temp.git
 [submodule "themes"]
 	path = themes
-	url = https://github.com:lsces/themes.git
+	url = https://github.com/lsces/themes.git
 [submodule "util"]
 	path = util
-	url = https://github.com:lsces/util.git
+	url = https://github.com/lsces/util.git
 [submodule "blogs"]
 	path = blogs
-	url = https://github.com:lsces/blogs.git
+	url = https://github.com/lsces/blogs.git
 [submodule "bnspell"]
 	path = bnspell
-	url = https://github.com:lsces/bnspell.git
+	url = https://github.com/lsces/bnspell.git
 [submodule "boards"]
 	path = boards
-	url = https://github.com:lsces/boards.git
+	url = https://github.com/lsces/boards.git
 [submodule "calendar"]
 	path = calendar
-	url = https://github.com:lsces/calendar.git
+	url = https://github.com/lsces/calendar.git
 [submodule "feed"]
 	path = feed
-	url = https://github.com:lsces/feed.git
+	url = https://github.com/lsces/feed.git
 [submodule "fisheye"]
 	path = fisheye
 	url = https://github.com/lsces/fisheye.git
 [submodule "gatekeeper"]
 	path = gatekeeper
-	url = https://github.com:lsces/gatekeeper.git
+	url = https://github.com/lsces/gatekeeper.git
 [submodule "messages"]
 	path = messages
-	url = https://github.com:lsces/messages.git
+	url = https://github.com/lsces/messages.git
 [submodule "newsletters"]
 	path = newsletters
-	url = https://github.com:lsces/newsletters.git
+	url = https://github.com/lsces/newsletters.git
 [submodule "nexus"]
 	path = nexus
-	url = https://github.com:lsces/nexus.git
+	url = https://github.com/lsces/nexus.git
 [submodule "pigeonholes"]
 	path = pigeonholes
-	url = https://github.com:lsces/pigeonholes.git
+	url = https://github.com/lsces/pigeonholes.git
 [submodule "rss"]
 	path = rss
-	url = https://github.com:lsces/rss.git
+	url = https://github.com/lsces/rss.git
 [submodule "search"]
 	path = search
-	url = https://github.com:lsces/search.git
+	url = https://github.com/lsces/search.git
 [submodule "stats"]
 	path = stats
-	url = https://github.com:lsces/stats.git
+	url = https://github.com/lsces/stats.git
 [submodule "wiki"]
 	path = wiki
-	url = https://github.com:lsces/wiki.git
+	url = https://github.com/lsces/wiki.git
 [submodule "install"]
 	path = install
-	url = https://github.com:lsces/install.git
+	url = https://github.com/lsces/install.git
 [submodule "gatekeeper"]
 	path = gatekeeper
-	url = https://github.com:lsces/gatekeeper.git
+	url = https://github.com/lsces/gatekeeper.git
 [submodule "quota"]
 	path = quota
 	url = https://github.com/lsces/quota.git
 [submodule "tags"]
 	path = tags
-	url = https://github.com:lsces/tags.git
+	url = https://github.com/lsces/tags.git
 [submodule "config/iconsets/tango"]
 	path = config/iconsets/tango
-	url = https://github.com:lsces/iconset_tango.git
+	url = https://github.com/lsces/iconset_tango.git
 [submodule "config/themes/colourstrap"]
 	path = config/themes/colourstrap
 	url = https://github.com/lsces/theme_colourstrap.git
 [submodule "config/themes/bootstrap"]
 	path = config/themes/bootstrap
-	url = https://github.com:lsces/theme_bootstrap.git
+	url = https://github.com/lsces/theme_bootstrap.git
 [submodule "contact"]
 	path = contact
 	url = https://github.com/lsces/contact.git
@@ -101,7 +101,7 @@
 	url = https://github.com/lsces/bootstrap.git
 [submodule "externals/silk"]
 	path = externals/silk
-	url = https://github.com:lsces/famfamfam-silk.git
+	url = https://github.com/lsces/famfamfam-silk.git
 [submodule "externals/famfamfam-silk"]
 	path = externals/famfamfam-silk
 	url = https://github.com/lsces/famfamfam-silk.git
