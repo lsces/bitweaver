@@ -1,0 +1,12 @@
+{
+    "require": {
+        "twbs/bootstrap": "^3.4",
+        "components/jquery": "^3.5.1",
+        "miljar/php-exif": "^0.6.5",
+        "shubhamjain/php-id3": "dev-master"
+    },
+    "config": {
+        "vendor-dir": "vendor"
+    },
+    "minimum-stability": "dev"
+}
