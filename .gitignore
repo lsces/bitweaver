@@ -1,1 +1,2 @@
 vendor/*
+config/kernel/config_inc.php
