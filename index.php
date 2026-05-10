@@ -13,7 +13,7 @@ if( !$gBitSystem->isDatabaseValid() ) {
 	KernelTools::install_error();
 } elseif( !$gBitSystem->getActivePackage() ) {
 	$bit_index = $gBitSystem->getConfig( 'bit_index' );
-	if( in_array( $bit_index, array_keys( $gBitSystem->mPackages )) && defined( strtoupper( $bit_index ).'_PKG_PATH' )) {
+	if( \in_array( $bit_index, array_keys( $gBitSystem->mPackages )) && \defined( strtoupper( $bit_index ).'_PKG_PATH' )) {
 		$gBitSystem->setActivePackage( $bit_index );
 	} else {
 		unset( $bit_index );
