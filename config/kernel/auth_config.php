@@ -1,6 +1,6 @@
 <?php
-session_name( 'bit-user-mergdemosite' );
+session_name( 'bit-user-myhomecloud' );
 session_start();
-$gBitDbHost='firebird:dbname=localhost:xxxx;charset=utf8;';
-$gBitDbUser='XXXX';
-$gBitDbPassword='pppp';
+$gBitDbHost='firebird:dbname=localhost:myhomecloud;charset=utf8;';
+$gBitDbUser='SYSDBA';
+$gBitDbPassword='smallBRO';

@@ -1,2 +1,7 @@
 vendor/*
 config/kernel/config_inc.php
+config/css/
+config/fonts/
+config/iconsets/
+config/images/
+config/themes/
