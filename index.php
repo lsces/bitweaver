@@ -23,7 +23,7 @@ if( !$gBitSystem->isDatabaseValid() ) {
 if( !empty( $_REQUEST['content_id'] )) {
 	if( $obj = LibertyBase::getLibertyObject( $_REQUEST['content_id'] )) {
 		$url = $obj->getDisplayUrl();
-		if( !empty($_REQUEST['highlight'] )) {
+		if( !empty($_REQUEST['highlight']) && !empty($url) ) {
 			if( preg_match( '/\?/', $url )) {
 				$url .= '&';
 			} else {
@@ -31,7 +31,9 @@ if( !empty( $_REQUEST['content_id'] )) {
 			}
 			$url .= 'highlight='.$_REQUEST['highlight'];
 		}
-		KernelTools::bit_redirect( $url );
+		if( !empty($url) ) {
+			KernelTools::bit_redirect( $url );
+		}
 	}
 } elseif( !empty( $_REQUEST['structure_id'] )) {
 	include LIBERTY_PKG_PATH.'display_structure_inc.php';
