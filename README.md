@@ -14,7 +14,7 @@ It is published here in the hope that parts of it are useful to others.
 
 | Layer | Technology |
 |---|---|
-| Language | PHP 8.5 |
+| Language | PHP 8.6 |
 | Database | Firebird 5 via adodb (`v5.22.11-lsc` branch) |
 | Templates | Smarty 5 |
 | CSS/JS | Bootstrap 3, jQuery — no npm, no Node.js |
