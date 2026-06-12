@@ -129,14 +129,24 @@ For role-based visibility, override `top_bar.tpl` in `config/themes/merg/kernel/
 
 ### CSS load order
 `BitThemes::loadStyleData()` loads CSS in this order:
-1. Package CSS (around position 300) — each package's `html_head_inc.tpl`
-2. Style CSS (`getStyleCssFile()`, position 998) — the active theme's main CSS
-3. Browser CSS (`getBrowserStyleCssFile()`, position 999)
-4. `themes/css/config.css` — loaded last; use this for global overrides (Bootstrap tweaks etc.)
+1. Package CSS (around position 300) — each package's `html_head_inc.tpl`; also
+   `config/css/config.css` (old duplicate of themes/css/config.css — see note below)
+2. `themes/css/config.css` — position 300 (default); canonical floaticon/icon/actionicon rules
+3. Style CSS (`getStyleCssFile()`, position 998) — the active theme's main CSS
+4. Browser CSS (`getBrowserStyleCssFile()`, position 999)
 
 Site-specific CSS lives in `/etc/webstack/domains/{site}/themes/{site}/{site}.css` and is
 the active theme file for that site (position 998). Site theme images go in
 `themes/{site}/images/` within that domain dir — referenced via `{$gBitThemes->getStyleUrl()}images/`.
+
+**`.floaticon` / `.icon` audit note** — `themes/css/config.css` defines `.floaticon { float:right }`
+at position 300. Site theme CSS at position 998 **wins** over this. If a site theme has
+`.icon { float:left }` (common in older themes for sprite icon layout), it breaks `.floaticon`
+by causing child icons to float left and collapse the container. **Fix**: strip the bare
+`.icon { float:left }` from the site CSS — do not scope it or patch it elsewhere.
+`config/css/config.css` is a stale duplicate of `themes/css/config.css` (slightly older,
+different padding direction); all sites should be audited to confirm it is not causing
+conflicts. `themes/css/config.css` is the canonical source.
 
 ### Smarty notes
 - `{tr}...{/tr}` for translation in templates; `KernelTools::tra()` in PHP
@@ -329,6 +339,28 @@ Group templates receive `$xrefGroup` (LibertyXrefGroup object). First two lines 
 ```
 
 Fallback for groups with no specific template → `liberty/list_xref.tpl`.
+
+**Linked content fields (`linked_title` / `linked_data`)** — `LibertyXrefType::loadContent()`
+LEFT JOINs `liberty_content lc_linked ON lc_linked.content_id = x.xref` and exposes
+`lc_linked.title AS linked_title` and `lc_linked.data AS linked_data` on every xref row.
+These come from the **linked content item's** `liberty_content` row (via the `x.xref` FK),
+NOT from the xref row's own `xkey`/`xkey_ext`/`data` columns (which are already available
+as `$xrefInfo.xkey`, `$xrefInfo.xkey_ext`, `$xrefInfo.data` without any join).
+When `x.xref > 0` these fields hold the title and description of the linked item (contact,
+component, assembly, etc.). `liberty_content` has no `xkey_ext` equivalent — if further
+fields from the linked item are needed, add them to the SELECT in `loadContent()` as
+additional `lc_linked.*` aliases, or use a correlated subquery for linked xref data.
+
+- **View templates**: use `$xrefInfo.linked_title` and `$xrefInfo.linked_data` directly — no
+  separate enrichment query needed.
+- **Edit templates** (`edit_xref.php` path): `enrichXrefDisplay()` is called on the single row
+  before display. Override this in the content class (e.g. `StockBase::enrichXrefDisplay()`)
+  to set `xref_title` for the edit form. The two paths use different field names by design.
+- **Extra fields** (e.g. `part_size` from a second xref): override `loadXrefInfo()` in the
+  content class, call `parent::loadXrefInfo()` first, then enrich the group rows. Use
+  `array_map( fn($r) => $r['xref'], $group->mXrefs )` — NOT `array_column()` — to extract
+  xref values from `LibertyXref` objects (ArrayAccess; `array_column` ignores offsetGet on
+  some PHP builds).
 
 **Floaticon placement** — on list pages the floaticon div goes inside the `<div class="floaticon">`
 inside the assembly view's header. On view/edit pages it goes inside the `.header` div before
