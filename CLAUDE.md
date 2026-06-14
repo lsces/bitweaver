@@ -1,7 +1,7 @@
 # Bitweaver-lsces Project Context
 
 ## Stack
-- PHP 8.6 / Firebird 5 / adodb / Smarty
+- PHP 8.5.7 / Firebird 5 / adodb / Smarty
 - One repo per package (bitweaver-lsces organisation)
 - webtrees used as an additional package with illuminate-firebird providing Firebird DB driver (personal fork)
 - externals/ holds actively-developed third-party dependencies
