@@ -451,6 +451,52 @@ History lives entirely in the parent archive chain; no domain-level archives are
 At the end of each productive session, append discoveries, decisions, and completed items to this file.
 Use `/clear` to reset context when it gets bloated — this file re-orients the session.
 
+### 2026-06-14 — Stock multi-user (kitelf) + PBLD prebuild type
+
+**Kitelf filtering**
+- `list_movements.php` / `list_stock.php`: `?user_id=X` filter; creator names in
+  list_movements are clickable filter links; breadcrumb shows kitelf name with link
+  to their filtered list; `×` clear replaced by breadcrumb `<small>` pattern
+- `list_movements.php`: unified `part_content_id` replaces separate
+  `assembly_content_id` / `component_content_id`; type-aware breadcrumb and qty column
+  (assembly kit count vs component qty with PRT/SHT formatting)
+- `StockMovement::getList()`: `$partId`/`$partIsAsm` collapse the two part vars;
+  unified `part_qty`/`part_qty_type` SELECT; `lc.user_id` added to SELECT;
+  PBLD added to all `IN('REQN','TRANS','ORDER')` lists and sort subqueries
+- `view_movement.tpl`: updated to `<header>`/`<section>` pattern with kitelf breadcrumb
+
+**PBLD movement type**
+- New `PBLD` (Prebuild) movement type: assembly-only, BOM exploded, optional note
+- `add_prebuild.php` / `add_prebuild.tpl`: creates PBLD; `add_requisition` retired
+  from UI (file kept); list_stock BOM "Create Requisition" → "Create Prebuild"
+- `edit_movement.php/tpl` / `view_movement.php/tpl`: `$isBuild` (REQN+PBLD) and
+  `$isPbld` flags; PBLD shows "Build Date"/"Completed"/"In progress" labels;
+  assembly picker and xref tab shown for both REQN and PBLD
+- `schema_inc.php`: PBLD registered in stockmovement reference xref items
+- `StockMovement::getDirection()`: PBLD explicit as 'O'; unknown types return ''
+
+**Owner change**
+- `edit_content_owner_inc.tpl` included in `edit_assembly.tpl` and `edit_movement.tpl`
+- `liberty_allow_change_owner` must be active + `p_liberty_edit_content_owner` permission
+- Enables reassigning `user_id` (kitelf ownership) from edit pages
+
+**Template cleanup**
+- Dead files removed: `center_list_assemblies.php`, `center_list_components.php`,
+  `center_component_comments.php/.tpl`, `center_list_components.tpl`,
+  `list_assemblies2.tpl`, `list_assemblies_simple.tpl`, `list_assemblies.tpl` (old)
+- Renamed: `stock_fixed_grid_inc.tpl` → `view_kitlocker.tpl`;
+  `list_assemblies_simple.tpl` → `list_assemblies.tpl`
+- `assembly_icons_inc.tpl` and `assembly_nav.tpl` properly implemented —
+  floaticons and breadcrumb extracted from `stock_simple_list_inc.tpl` into includes
+- `user_galleries.tpl`: inlined from `list_assemblies2.tpl`; sortby suppressed in
+  user view; floaticons (print, add prebuild, stock levels); panel layout with
+  `panel-heading` (title + KLID), `panel-body` (parsed_data), `panel-footer` (counts)
+
+**StockAssembly::getList() enriched**
+- Now provides per-row: `parsed_data` (via `parseDataHash`), `part_number` (#SUP first),
+  `klid`, `component_count` (BOM lines), `prebuild_count` (PBLD kit total for assembly
+  owner via correlated subquery — uses `mc.user_id = lc.user_id`)
+
 ## CC Limitations
 For execution-order bugs and session/config state problems, 
 use xdebug rather than asking CC to trace — static analysis 
