@@ -118,82 +118,12 @@ Login stores PHP `session_id()` in `users_cnxn.cookie` mapped to `user_id`.
 Subsequent requests look up the cookie value in `users_cnxn` to identify the user —
 this is separate from PHP's own session mechanism (though they share the same cookie name).
 
-### Top navbar menu
-Each package self-registers via `$gBitSystem->registerAppMenu()` in its `bit_setup_inc.php`.
-Rendered by `kernel/templates/top_bar.tpl` — no built-in role gate at the dropdown level.
-Config switches (stored in kernel_config, set via Themes > Admin > Menus):
-- `menu_$pkg = 'n'` — disable dropdown for all users
-- `${pkg}_menu_text` — custom dropdown label
-- `${pkg}_menu_position` — sort position
-For role-based visibility, override `top_bar.tpl` in `config/themes/merg/kernel/`.
-
-### CSS load order
-`BitThemes::loadStyleData()` loads CSS in this order:
-1. Package CSS (around position 300) — each package's `html_head_inc.tpl`; also
-   `config/css/config.css` (old duplicate of themes/css/config.css — see note below)
-2. `themes/css/config.css` — position 300 (default); canonical floaticon/icon/actionicon rules
-3. Style CSS (`getStyleCssFile()`, position 998) — the active theme's main CSS
-4. Browser CSS (`getBrowserStyleCssFile()`, position 999)
-
-Site-specific CSS lives in `/etc/webstack/domains/{site}/themes/{site}/{site}.css` and is
-the active theme file for that site (position 998). Site theme images go in
-`themes/{site}/images/` within that domain dir — referenced via `{$gBitThemes->getStyleUrl()}images/`.
-
-**`.floaticon` / `.icon` audit note** — `themes/css/config.css` defines `.floaticon { float:right }`
-at position 300. Site theme CSS at position 998 **wins** over this. If a site theme has
-`.icon { float:left }` (common in older themes for sprite icon layout), it breaks `.floaticon`
-by causing child icons to float left and collapse the container. **Fix**: strip the bare
-`.icon { float:left }` from the site CSS — do not scope it or patch it elsewhere.
-`config/css/config.css` is a stale duplicate of `themes/css/config.css` (slightly older,
-different padding direction); all sites should be audited to confirm it is not causing
-conflicts. `themes/css/config.css` is the canonical source.
-
-### Smarty notes
-- `{tr}...{/tr}` for translation in templates; `KernelTools::tra()` in PHP
-- `tra` is NOT a Smarty modifier — `"string"|tra` will throw a compiler error
-- `{form}` block plugin auto-injects `<input type="hidden" name="tk">` (CSRF ticket)
-- **`form-search` hides Bootstrap submit buttons** — Bootstrap 2 `.form-search` suppresses
-  the submit control. Use `class="minifind"` alone on floaticon filter forms; never add `form-search`.
-- `{strip}` removes whitespace between HTML tags; keep `&bull;` separators inside
-  valid `<li>` elements to avoid detachment
-- Per-site footer scripts belong in `kernel/footer_inc.tpl`, NOT `kernel/footer.tpl`.
-  `footer_inc.tpl` is picked up by the `mAuxFiles` loop in `html.tpl` reliably.
-  `footer.tpl` as a theme override only loads if the active style matches exactly —
-  fragile and easy to miss.
-
-### Module / Layout system
-Modules are placed in layout areas via the `THEMES_LAYOUTS` table:
-- `LAYOUT_AREA` — column position: `t` (top), `l` (left), `r` (right), `b` (bottom)
-- `POS` — sort order within the column
-- `MODULE_RSRC` — the Smarty template to render, e.g. `bitpackage:kernel/mod_top_banner.tpl`
-- `ROLES` — role_id that can see this module (empty = all users); use `-1` for anonymous-only
-
-The 't' column is rendered inside `<header id="bw-main-header">` via `displayLayoutColumn('t')`.
-Bootstrap grid columns (`col-sm-*`) inside modules MUST be wrapped in a `clearfix` parent;
-without it, subsequent modules in the same column float up and overlay earlier ones.
-
-Managed via Admin > Themes > Layout. Template includes resolve via `bitpackage:` prefix.
-
-Column visibility is controlled by feature flags in `kernel_config` checked in `BitThemes::loadLayout()`:
-- `{display_mode}_hide_{area}_col` (e.g. `edit_hide_left_col`)
-- `{package}_hide_{area}_col`
-- `{package}_{display_mode}_hide_{area}_col`
-The old hardcoded `display_mode != 'edit'` guard in `html.tpl` has been removed — columns now always
-follow these flags. All flags off = columns show on all pages including edit pages.
-
-### Site-specific theme overrides (/etc/webstack/domains)
-Each vhosted site has its theme overrides at `/etc/webstack/domains/{site}/themes/{site}/`.
-These are symlinked into `bitweaver5/config/themes/{site}` — e.g.:
-```
-/srv/website/bitweaver5/config/themes/merg -> /etc/webstack/domains/merg/themes/merg
-```
-Typical contents: `kernel/` (top_bar.tpl, top_banner.tpl, etc.), `images/`, site CSS, favicon.
-Any template in this path overrides the package default via Smarty's `bitpackage:` resource lookup.
-`config/themes/medw` and `config/themes/merg` are both symlinks — never edit the config/themes
-path directly; edit the source in `/etc/webstack/domains/`.
+See `themes/CLAUDE.md` for: navbar menu, CSS load order, Smarty notes, module/layout
+system, site-specific theme overrides.
 
 ### Package-specific notes
 Detail for individual packages lives in their own `CLAUDE.md` files:
+- `themes/CLAUDE.md` — navbar menu, CSS load order, Smarty notes, module/layout, site overrides
 - `liberty/CLAUDE.md` — xref machinery (LibertyXrefType, dual-guid schema, display path,
   parseDataHash, storeXref, owner change, Firebird GROUP BY)
 - `contact/CLAUDE.md` — person/business model, ContactPerson/ContactBusiness plan, SCREF,
