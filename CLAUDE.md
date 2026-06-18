@@ -90,7 +90,6 @@ stock and contact packages
 - webtrees data/images separation (buried in app, needs separating like bitweaver storage)
 - externals/composer halfway-house — ckeditor and util-type dependencies
 - `/srv/git/bitweaver` → nginx wiring (infrastructure thread, separate from code work)
-- phpsurgery theme: currently using BlueSky — needs a proper site-specific theme tidy
 - contact + stock: audit `expunge` permission gating on xref item templates — some delete
   actions (expunge=1/-1) push to history rather than hard-delete, so should gate on
   `_update` not `_expunge`. Trace `edit_xref.php` for each `expunge` value: if it sets a
@@ -133,10 +132,33 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
 
 ## Infrastructure
 
+### Site folder structure
+Each live site at `/srv/website/<site>/` contains only two static directories:
+- `config/kernel/` — site-specific DB connection (`config_inc.php`), auth config
+- `config/themes/` — symlinks to `/etc/webstack/domains/<site>/themes/<site>/` and shared themes
+- `storage/` — site-specific uploaded files and attachments
+
+Everything else is symlinked:
+- All packages (`wiki`, `liberty`, `fisheye`, etc.) → `../_bw5/<pkg>`
+- `externals/` → `../externals`
+- `index.php`, `sitemap.php` → `../_bw5/` equivalents
+- `config/admin`, `config/icons`, `config/includes`, `config/index.php` → `../../_bw5/config/`
+
+Use `/etc/webstack/scripts/setup-site-links.sh [site]` to create or repair all symlinks
+for all sites (or one named site). Auto-discovers packages from `_bw5/`. Safe to re-run.
+
+**Desktop** (`bitweaver5/`) is a single unified root — not a site folder. Switch between
+sites by changing `config/kernel/config_inc.php` to point at a different database. All
+site themes are available because `config/themes/` has symlinks to all webstack domains.
+
+`_bw5/config/` on servers holds the generic config package (admin, icons, includes,
+index.php guard) deployed via `server-pull-all.sh config`. Per-site `config/` folders
+are NOT managed by that script — they are static per-server.
+
 ### /etc/webstack
 Single git repo replicated across desktop, srv9, and srv10. Push to `/srv/git/webstack.git`
 before pulling on servers — servers pull from the desktop copy, not GitHub.
-Contains: nginx vhost configs, logrotate, cron scripts, domain theme symlinks, PHP/Firebird config.
+Contains: nginx vhost configs, logrotate, cron scripts, per-domain theme files, PHP/Firebird config, setup scripts.
 `/etc/logrotate.d/nginx` is a **hard link** to `/etc/webstack/logrotate.d/nginx` — one config,
 not two competing ones. Never edit via `/etc/logrotate.d/` directly.
 
@@ -173,6 +195,12 @@ Use `/clear` to reset context when it gets bloated — this file re-orients the 
 ### 2026-06-14 — Stock multi-user kitelf filtering + PBLD prebuild type
 Stock template cleanup; kitelf `user_id` filtering across list pages; PBLD movement type;
 owner change on assembly/movement edit pages. Detail in `stock/CLAUDE.md`.
+
+### 2026-06-17/18 — Theme/asset cleanup + site structure rationalisation
+Config folders cleaned to `kernel/` + `themes/` only; generic config parts (`admin/`, `icons/`,
+`includes/`, `index.php`) now symlinked from `_bw5/config/` via `setup-site-links.sh`.
+Site `index.php` replaced with symlink to `_bw5/index.php`. `config/` package repo cleaned.
+Full detail in `themes/CLAUDE.md`.
 
 ## CC Limitations
 For execution-order bugs and session/config state problems, 
