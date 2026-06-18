@@ -129,6 +129,7 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
   load() cleanup, delete/expunge
 - `stock/CLAUDE.md` — file naming, movement model (REQN/PBLD/TRANS/ORDER), template
   structure, multi-user kitelf filtering, getList() enriched fields
+- `wiki/CLAUDE.md` — BitPage::store() missing RollbackTrans bug (intermittent "page not found")
 
 ## Infrastructure
 
