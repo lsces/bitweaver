@@ -97,6 +97,14 @@ stock and contact packages
   Stock xref deletes currently gate on `$xrefAllowEdit` only — need `p_stock_expunge` added.
 - icon set — current tango icons for stock/contact menus are placeholder; proper custom
   icons needed for assemblies, components, movements, requisitions, add-person, add-business
+- `wordpress_hacks.conf` — consider adding common junk scanner filenames as an explicit match
+  (e.g. `this_is_a_new_hello_world.php`, `lp6.php`, `clasa99.php`, `ph33w.php`, `errw.php` — the
+  mass-scan "throw random PHP filenames at the root" pattern visible in myhomecloud's goaccess
+  Not Found report). Currently these are generic 404s on `access.log`, not routed through
+  `attempts.log` since they don't match the existing wp-/xmlrpc/etc. regex. Deliberately deferred
+  2026-07-27 — myhomecloud's report shows ~10MB of this "dross" against ~1.7GB of real traffic,
+  under 1%, not worth chasing yet. Revisit once the ratio grows or other domains' reports get
+  reviewed. Do not action until asked — needs a real filename sample first, not a guessed list.
 
 ## Bitweaver Structure Notes
 
@@ -132,70 +140,35 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
 - `wiki/CLAUDE.md` — BitPage::store() missing RollbackTrans bug (intermittent "page not found")
 
 ## Infrastructure
-
-### Site folder structure
-Each live site at `/srv/website/<site>/` contains only two static directories:
-- `config/kernel/` — site-specific DB connection (`config_inc.php`), auth config
-- `config/themes/` — symlinks to `/etc/webstack/domains/<site>/themes/<site>/` and shared themes
-- `storage/` — site-specific uploaded files and attachments
-
-Everything else is symlinked:
-- All packages (`wiki`, `liberty`, `fisheye`, etc.) → `../_bw5/<pkg>`
-- `externals/` → `../externals`
-- `index.php`, `sitemap.php` → `../_bw5/` equivalents
-- `config/admin`, `config/icons`, `config/includes`, `config/index.php` → `../../_bw5/config/`
-
-Use `/etc/webstack/scripts/setup-site-links.sh [site]` to create or repair all symlinks
-for all sites (or one named site). Auto-discovers packages from `_bw5/`. Safe to re-run.
-
-**Desktop** (`bitweaver5/`) is a single unified root — not a site folder. Switch between
-sites by changing `config/kernel/config_inc.php` to point at a different database. All
-site themes are available because `config/themes/` has symlinks to all webstack domains.
-
-`_bw5/config/` on servers holds the generic config package (admin, icons, includes,
-index.php guard) deployed via `server-pull-all.sh config`. Per-site `config/` folders
-are NOT managed by that script — they are static per-server.
-
-### /etc/webstack
-Single git repo replicated across desktop, srv9, and srv10. Push to `/srv/git/webstack.git`
-before pulling on servers — servers pull from the desktop copy, not GitHub.
-Contains: nginx vhost configs, logrotate, cron scripts, per-domain theme files, PHP/Firebird config, setup scripts.
-`/etc/logrotate.d/nginx` is a **hard link** to `/etc/webstack/logrotate.d/nginx` — one config,
-not two competing ones. Never edit via `/etc/logrotate.d/` directly.
-
-### Nginx log structure
-Central combined log: `/var/log/nginx/access.log` — every request from all vhosts, domain name
-appended at end of each line by nginx log format.
-Per-domain dirs: `/var/log/nginx/{domain}/` — contain `access.log` (filtered, rebuilt nightly),
-`80.access.log` (port 80, written directly by nginx), and `error.log`. All are covered by the
-domain logrotate stanza (`size=+8M`, `rotate 7`). The filtered `access.log` is always small so
-`notifempty` skips it; the stanza exists for `80.access.log` and `error.log`.
-
-Logrotate on Tumbleweed is a **crontab entry**, not a cron.daily script — ordering tricks
-(renaming files in cron.daily) do not affect when logrotate runs relative to nginx-stats.
-
-Raw log rotation (parent only): `size=+16M`, `rotate 14`, `maxage 30`, `delaycompress`.
-At current traffic (~7 MB/day) this gives ~30 days of history across ~14 archives.
-Compressed archives use `.xz` or `.gz` depending on when they were created.
-
-### nginx-stats / goaccess
-Script: `/etc/webstack/cron.daily/nginx-stats`
-
-Runs nightly. Builds `/tmp/nginx-combined.log` from the current `access.log` plus all
-parent archives (decompressing `.xz`/`.gz` inline), then greps per domain into
-`/var/log/nginx/{domain}/access.log`, runs goaccess, publishes
-`/srv/website/{domain}/stats-rep.html`. Cleans up `combined.log` on exit.
-
-Domain `access.log` files are ephemeral outputs — rebuilt from parent archives each run.
-History lives entirely in the parent archive chain; no domain-level archives are created.
+Detail lives in `/etc/webstack/CLAUDE.md` — its own repo, own `CLAUDE.md`, same pattern as the
+bitweaver packages above (`themes/CLAUDE.md` etc). Covers: site folder structure and symlink
+layout, `/etc/webstack` itself, the Firebird backup/DR mirror between srv9 and srv10, nginx log
+structure and logrotate gotchas, fail2ban (jails, known limitations), and nginx-stats/goaccess.
 
 ## Session Management
 At the end of each productive session, append discoveries, decisions, and completed items to this file.
 Use `/clear` to reset context when it gets bloated — this file re-orients the session.
 
+### 2026-07-27 — nginx log consolidation, orphaned file cleanup, firebird-restore for srv9
+Fixed a stuck-file logrotate bug and a fail2ban blind spot (default_server catch-all traffic was
+invisible to any jail); consolidated all "blind attempt" logging into one top-level
+`attempts.log`. Swept ~970MB of orphaned log files off both servers. Fixed `nginx-stats` to
+parse `rdm1.uk` like every other domain, and brought `goaccess.conf` under webstack tracking
+(srv9 never had it configured at all). Documented, not fixed, a fail2ban `maxretry` timing
+limitation. Built `firebird-restore` — a manual (not automated) script for refreshing srv9's DR
+mirror (database + full storage tree) from srv10, after discovering `firebird-backup` had been
+silently not running on srv9 for ~3 months (srv9's `/etc/cron.daily/` turned out to be empty,
+not a timing issue as first assumed). Full detail in `/etc/webstack/CLAUDE.md` and the
+`reference_fail2ban_gotchas` memory.
+
 ### 2026-06-14 — Stock multi-user kitelf filtering + PBLD prebuild type
 Stock template cleanup; kitelf `user_id` filtering across list pages; PBLD movement type;
 owner change on assembly/movement edit pages. Detail in `stock/CLAUDE.md`.
+
+### 2026-06-22/23 — Per-site JS loader pattern + banner/footer tidies
+rainbowdigitalmedia scrolling banner restored after config/images removal; roundabout and
+haccordion JS moved out of global bit_setup_inc.php into per-site theme_setup_inc.php files
+managed via webstack. setup-site-links.sh updated to auto-symlink them. Detail in `themes/CLAUDE.md`.
 
 ### 2026-06-17/18 — Theme/asset cleanup + site structure rationalisation
 Config folders cleaned to `kernel/` + `themes/` only; generic config parts (`admin/`, `icons/`,
