@@ -40,6 +40,10 @@ git repo replicated across desktop, srv9, and srv10. Never look in `/etc/nginx` 
 Test all changes on srv9 first (including `zypper dup` before system updates).
 srv10 is production — only gets changes proven on srv9.
 
+`ssh root@srv9` / `ssh root@srv10` work directly from the desktop (key-based, no password) —
+use this for anything needing live server state: nginx/fail2ban config verification, log
+inspection, service reload/restart, etc. No sudo needed once connected.
+
 ## Scope
 Focus exclusively on Bitweaver code in the current working package.
 Do not roam into other packages unless explicitly asked.
@@ -148,6 +152,25 @@ structure and logrotate gotchas, fail2ban (jails, known limitations), and nginx-
 ## Session Management
 At the end of each productive session, append discoveries, decisions, and completed items to this file.
 Use `/clear` to reset context when it gets bloated — this file re-orients the session.
+
+### 2026-07-27 — Firebird DR mirror cleanup, desktop firebird-restore enablement
+Chased down a "myhomecloud grown to 500MB but srv9 copy is 19MB" alarm — turned out to be normal
+Firebird behaviour (`.fdb` files never shrink on their own; only a `gbak` backup/restore cycle
+reclaims space) plus Dolphin mangling the filename shown inside `.fbk.gz` archives (the actual
+gzip-embedded name was correct in every case checked — don't trust Dolphin's archive preview for
+this, verify with `gzip -l` or a raw header read instead). Row-count comparison confirmed no data
+loss between srv10 live and srv9 restored. Cleaned stray uncompressed `<domain>.fbk` and stale
+`<domain>.fdb.old` snapshots (leftover from a 17/05/26 batch operation) out of `/srv/firebird/`
+for all 8 backed-up domains on srv9 and srv10, and off desktop (user did desktop's cleanup by
+hand, including a pile of obsolete dev-version `.fdb`/`.fbk` clutter — `domain2/3/4` variants,
+webtrees version snapshots — that didn't match the server pattern). Found desktop was missing
+the `/opt/firebird/SYSDBA.password` → `/etc/webstack/firebird/SYSDBA.password` symlink that
+srv9/srv10 both have (same class of gap as the goaccess/cron.daily parity issues from the
+previous session) — fixed, so `firebird-restore` should now be runnable from desktop too
+(untested — still needs `sudo` there since desktop isn't a root shell like srv9/10). Noted but
+not actioned: `merg` (merg.rdm1.uk) is a live domain not in `firebird-backup`'s 8-domain list —
+no automated backup/DR coverage yet; webtrees firebird dir on desktop needs sorting through
+multiple version-named `.fdb` files. Full detail in `/etc/webstack/CLAUDE.md`.
 
 ### 2026-07-27 — nginx log consolidation, orphaned file cleanup, firebird-restore for srv9
 Fixed a stuck-file logrotate bug and a fail2ban blind spot (default_server catch-all traffic was
