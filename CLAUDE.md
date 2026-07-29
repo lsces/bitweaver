@@ -89,20 +89,35 @@ stock and contact packages
 ### Active
 - hauth/facebook login — keep option open; not culling
 - JavaScript tidy — other areas beyond util/javascript
-- mapper "unbalanced tree" cleanup — mapper is live on srv9+srv10 (see `mapper/CLAUDE.md`,
-  `project_mapper_osrm_revival` memory) but its view-layer content is split across four
-  places, unlike every other package's `templates/`-only convention: `html/` (17 files — 9
-  real frameset pages + 8 near-duplicate `_blank.html` variants), `theme/` (5 raw MapServer-
-  template HTML fragments), `modules/` (5 more `.tpl` files outside `templates/`), and
-  `templates/` itself (mixed admin/config tpls plus an odd `center_view_map.php`+`.tpl` pair).
-  **Step 1, starting point (agreed 2026-07-29):** work out whether the `*_blank.html` files
-  (`form_blank`, `legend_blank`, `link_blank`, `map_blank`, `navi_blank`, `script_blank`,
-  `tool_blank`) are still reachable/needed by the frameset's load sequence, or dead leftovers
-  — remove what's dead. Lowest-risk pass, doesn't touch MapServer TEMPLATE semantics or Smarty
-  conversion. Later steps (consolidating html/theme/modules into templates/, converting static
-  fragments to real Smarty `.tpl`) deliberately not decided yet — scope one step at a time,
-  each is real refactor risk against a now-working frameset (see the frame/JS-context-split
-  and MapServer-magic-string gotchas already documented in `mapper/CLAUDE.md`).
+- mapper "unbalanced tree" — **this is the browser-parsing term, not a directory-layout
+  complaint** (corrected 2026-07-29 after an earlier session in this thread misread it as the
+  latter — see `mapper/CLAUDE.md` for the full corrected writeup). `document.write()`/
+  `document.writeln()` calls that don't complete cleanly can force the browser's speculative
+  preload-scanner tree to diverge from the real one, so the browser throws it away and
+  reparses — see MDN's Speculative Parsing glossary page. Nearly every mapper `html/*.html`
+  file (plus `theme/noFeature.html` and `html/script.php`) opens its `<body>` and builds its
+  content via `document.write()`/`writeln()` — a wholesale pre-PHP7-era pattern, not a couple of
+  stray calls. Modernising this is the real, still-open work; the file-location audit (below)
+  was a legitimate but separate side-finding from the same session, worth keeping but not a
+  substitute for this.
+  - **Easy, near-zero-risk subset:** the 7 `*_blank.html` files' `document.write()` calls are
+    all a single hardcoded static string (e.g. `document.writeln('<body bgcolor="#FFFFFF">')`)
+    with no dynamic value — trivially replaceable with plain static `<body>` markup, no JS
+    needed at all.
+  - **Harder subset:** `form.html`, `help.html`, `navi.html`, `tool.html`, `legend.html`,
+    `link.html`, `map.html`, `map_init.html`, `script.php`, `theme/noFeature.html` build real
+    dynamic content (colors/attrs from `t.*`/`o.*` JS globals, loops over layer lists, table
+    structure) via `document.write()` — needs restructuring to static HTML + post-parse DOM
+    manipulation (or server-side where the values are already known, as `script.php` did for
+    `script.html`), file by file, not a mechanical find/replace. Not scoped yet.
+  - File-location side-finding (kept for reference, not the main point): `html/`+`theme/` are
+    legitimately non-Smarty because MapServer's own `TEMPLATE`/`HEADER`/`FOOTER`/`EMPTY`
+    directives require real files there; `modules/`'s 5 files follow the standard Bitweaver
+    `{bitmodule}` convention; `templates/center_view_map.php`+`.tpl` is the standard Bitweaver
+    companion-php mechanism (`ResourceBitpackage.php`'s `populate()`/`getSiblingPhpFile()`,
+    seen across `feed/`, `users/`, `liberty/`, `wiki/`, `fisheye/`, `blogs/` too — legacy but
+    functional, a Smarty5 rewrite is a framework-wide question for another day, not mapper-
+    specific). Nothing dead found in any of the four locations.
 
 ### Pending
 - webtrees data/images separation (buried in app, needs separating like bitweaver storage)
