@@ -142,6 +142,8 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
 - `stock/CLAUDE.md` — file naming, movement model (REQN/PBLD/TRANS/ORDER), template
   structure, multi-user kitelf filtering, getList() enriched fields
 - `wiki/CLAUDE.md` — BitPage::store() missing RollbackTrans bug (intermittent "page not found")
+- `mapper/CLAUDE.md` — MapServer viewer, frame/JS context split, selectable mapsets
+  (script.php/mapsets_inc.php), storage/maps vs storage/mapper, CGI param semantics
 
 ## Infrastructure
 Detail lives in `/etc/webstack/CLAUDE.md` — its own repo, own `CLAUDE.md`, same pattern as the
