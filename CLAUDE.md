@@ -89,6 +89,20 @@ stock and contact packages
 ### Active
 - hauth/facebook login — keep option open; not culling
 - JavaScript tidy — other areas beyond util/javascript
+- mapper "unbalanced tree" cleanup — mapper is live on srv9+srv10 (see `mapper/CLAUDE.md`,
+  `project_mapper_osrm_revival` memory) but its view-layer content is split across four
+  places, unlike every other package's `templates/`-only convention: `html/` (17 files — 9
+  real frameset pages + 8 near-duplicate `_blank.html` variants), `theme/` (5 raw MapServer-
+  template HTML fragments), `modules/` (5 more `.tpl` files outside `templates/`), and
+  `templates/` itself (mixed admin/config tpls plus an odd `center_view_map.php`+`.tpl` pair).
+  **Step 1, starting point (agreed 2026-07-29):** work out whether the `*_blank.html` files
+  (`form_blank`, `legend_blank`, `link_blank`, `map_blank`, `navi_blank`, `script_blank`,
+  `tool_blank`) are still reachable/needed by the frameset's load sequence, or dead leftovers
+  — remove what's dead. Lowest-risk pass, doesn't touch MapServer TEMPLATE semantics or Smarty
+  conversion. Later steps (consolidating html/theme/modules into templates/, converting static
+  fragments to real Smarty `.tpl`) deliberately not decided yet — scope one step at a time,
+  each is real refactor risk against a now-working frameset (see the frame/JS-context-split
+  and MapServer-magic-string gotchas already documented in `mapper/CLAUDE.md`).
 
 ### Pending
 - webtrees data/images separation (buried in app, needs separating like bitweaver storage)
@@ -154,6 +168,21 @@ structure and logrotate gotchas, fail2ban (jails, known limitations), and nginx-
 ## Session Management
 At the end of each productive session, append discoveries, decisions, and completed items to this file.
 Use `/clear` to reset context when it gets bloated — this file re-orients the session.
+
+### 2026-07-29 — mapper live on srv10, mapper/CLAUDE.md added, unbalanced-tree cleanup started
+Deployed mapper to srv10 (`zypper install mapserver`, package clone + `chown nginx:nginx`,
+`/etc/mapserver.conf` + mapfile symlinks from webstack, `setup-site-links.sh lsces`, nginx/
+php-fpm reload) — repeated the srv9 sequence, verified identically via curl (pages 200,
+default mapset resolves to lsces's 5-layer `iom` set, `storage/mapper` 403s, a real `mapserv`
+CGI render returns a valid PNG). srv9 also re-verified end-to-end against the final
+script.php/mapsets_inc.php architecture. `https://lsces.uk/wiki/Mapping+Index` now links to a
+working map. Added `mapper/CLAUDE.md` (frame/JS-context split, mapset architecture, storage
+layout, CGI semantics) and linked it from this file's package-notes list; fixed a missing
+`/mapper/` entry in `~/Development/bitweaver-lsces/.gitignore`. Verified `switch-site`'s
+`storage/maps` symlink handling on desktop (no-op when correct, leaves it alone for domains
+without their own `storage/maps`, backs up rather than deletes a real directory in the way).
+Full detail in `project_mapper_osrm_revival` memory. Next: mapper "unbalanced tree" cleanup,
+step 1 — see Active work threads above.
 
 ### 2026-07-27 — Firebird DR mirror cleanup, desktop firebird-restore enablement
 Chased down a "myhomecloud grown to 500MB but srv9 copy is 19MB" alarm — turned out to be normal
