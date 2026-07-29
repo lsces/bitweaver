@@ -89,35 +89,12 @@ stock and contact packages
 ### Active
 - hauth/facebook login — keep option open; not culling
 - JavaScript tidy — other areas beyond util/javascript
-- mapper "unbalanced tree" — **this is the browser-parsing term, not a directory-layout
-  complaint** (corrected 2026-07-29 after an earlier session in this thread misread it as the
-  latter — see `mapper/CLAUDE.md` for the full corrected writeup). `document.write()`/
-  `document.writeln()` calls that don't complete cleanly can force the browser's speculative
-  preload-scanner tree to diverge from the real one, so the browser throws it away and
-  reparses — see MDN's Speculative Parsing glossary page. Nearly every mapper `html/*.html`
-  file (plus `theme/noFeature.html` and `html/script.php`) opens its `<body>` and builds its
-  content via `document.write()`/`writeln()` — a wholesale pre-PHP7-era pattern, not a couple of
-  stray calls. Modernising this is the real, still-open work; the file-location audit (below)
-  was a legitimate but separate side-finding from the same session, worth keeping but not a
-  substitute for this.
-  - **Easy, near-zero-risk subset:** the 7 `*_blank.html` files' `document.write()` calls are
-    all a single hardcoded static string (e.g. `document.writeln('<body bgcolor="#FFFFFF">')`)
-    with no dynamic value — trivially replaceable with plain static `<body>` markup, no JS
-    needed at all.
-  - **Harder subset:** `form.html`, `help.html`, `navi.html`, `tool.html`, `legend.html`,
-    `link.html`, `map.html`, `map_init.html`, `script.php`, `theme/noFeature.html` build real
-    dynamic content (colors/attrs from `t.*`/`o.*` JS globals, loops over layer lists, table
-    structure) via `document.write()` — needs restructuring to static HTML + post-parse DOM
-    manipulation (or server-side where the values are already known, as `script.php` did for
-    `script.html`), file by file, not a mechanical find/replace. Not scoped yet.
-  - File-location side-finding (kept for reference, not the main point): `html/`+`theme/` are
-    legitimately non-Smarty because MapServer's own `TEMPLATE`/`HEADER`/`FOOTER`/`EMPTY`
-    directives require real files there; `modules/`'s 5 files follow the standard Bitweaver
-    `{bitmodule}` convention; `templates/center_view_map.php`+`.tpl` is the standard Bitweaver
-    companion-php mechanism (`ResourceBitpackage.php`'s `populate()`/`getSiblingPhpFile()`,
-    seen across `feed/`, `users/`, `liberty/`, `wiki/`, `fisheye/`, `blogs/` too — legacy but
-    functional, a Smarty5 rewrite is a framework-wide question for another day, not mapper-
-    specific). Nothing dead found in any of the four locations.
+- **mapper "unbalanced tree" (document.write() elimination) — done 2026-07-29.** Every file
+  fixed, deployed, verified on srv9+srv10; German→English pass done alongside. Full detail in
+  `mapper/CLAUDE.md`. **Next mapper thread:** what to actually do with the ~1.1GB of OS mapping
+  data already sitting in `mapper/data/` (currently unused beyond being on disk), or revisiting
+  an OSRM routing replacement (currently dead, no running instance anywhere) — not scoped yet,
+  pick one starting point next session.
 
 ### Pending
 - webtrees data/images separation (buried in app, needs separating like bitweaver storage)
@@ -183,6 +160,40 @@ structure and logrotate gotchas, fail2ban (jails, known limitations), and nginx-
 ## Session Management
 At the end of each productive session, append discoveries, decisions, and completed items to this file.
 Use `/clear` to reset context when it gets bloated — this file re-orients the session.
+
+### 2026-07-29 (cont'd) — mapper document.write() elimination completed, merg onboarded, infra cleanup
+**mapper:** corrected the "unbalanced tree" misreading (see Active thread above), then eliminated
+`document.write()`/`writeln()` across all of `html/`, `theme/noFeature.html`, and `script.php`
+(plus `scripts/layer.js`, whose cross-frame functions did map.html's actual drawing). Found and
+fixed a real bug along the way: `navi.html`'s `<form name="navi">` opened mid-table instead of
+wrapping it — worked before only via a legacy backward-compat parsing quirk that a single-string
+`insertAdjacentHTML` doesn't trigger the same way live `document.write()` did; broke the identify
+tool and layer checkboxes until fixed. Followed by a German→English pass (visible text + internal
+identifiers/comments) — see `mapper/CLAUDE.md` for full detail on both, kept terse here per
+[[feedback_doc_terseness_mechanical]].
+
+**PHP-FPM/infra cleanup:** chased a "sluggish mapper" report through two false leads (wrong
+systemd unit theory, wrong pool-size theory) before landing on the real explanation — mapper's
+frameset does 2 full kernel bootstraps per page view, inherent to the architecture, not a
+misconfig; APCu enabled to help (srv9 first, then srv10, since srv9 showed nothing else going on).
+Along the way: removed a genuinely dead `php8/fpm/php-fpm.d/www.conf` (never `include`d),
+decommissioned `php84-fpm` everywhere (a deliberately-retained pre-`zypper dup` build, now fully
+unreferenced — see [[project_php_version_retention]] for why this pattern will recur at php8.6),
+and removed two stale desktop-only vhosts (`local-bitweaver`, `local-webtrees` — the latter
+pointed at a directory that no longer exists).
+
+**merg.rdm1.uk onboarded properly:** was live with zero Firebird DR coverage — added to both
+`firebird-backup` and `firebird-restore`, ran the full chain once manually to confirm (not just
+added on paper). Also found `lsces`/`medw`/`merg` had all lost their `config_inc.php` symlinks
+(edited directly on the server, likely Kate defeating the symlink on save — see
+[[reference_config_symlink_breakage]]) — restored all three, fixing a stale `IS_LIVE=false` on
+two and a stale `BIT_CACHE_OBJECTS=false` on the third along the way. Added merg to `nginx-stats`
+and, while there, found+fixed a real bug: the `rdm1` report's grep pattern was unanchored and had
+been silently absorbing `merg.rdm1.uk`/`git.rdm1.uk` traffic (~761k lines of it vs ~94k genuine
+`rdm1.uk` hits) — anchored it to exclude subdomains. Separately widened `wordpress_hacks.conf`'s
+wp-/xmlrpc filter to catch scanner requests that guess a subdirectory first
+(`/blog/wp-includes/`, `/wordpress/wp-includes/`, etc.) — confirmed via real log data this was
+missing ~6,500 requests across every domain, not just merg.
 
 ### 2026-07-29 — mapper live on srv10, mapper/CLAUDE.md added, unbalanced-tree cleanup started
 Deployed mapper to srv10 (`zypper install mapserver`, package clone + `chown nginx:nginx`,
