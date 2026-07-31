@@ -203,9 +203,13 @@ per-site path — so a relative path can never correctly reach site-specific sto
 `git update-index --skip-worktree` so GitHub/desktop keep the clean portable version while each
 server carries its own local, un-synced override. `OS250.map` (same hardcoded-path bugs, plus
 invalid syntax, plus tile data that was never actually downloaded) removed entirely as dead
-scaffolding, along with a pile of superseded untracked data in `mapper/data/`. Full detail —
-every mapset's layer/scale choices, exact bug mechanics, skip-worktree setup — in
-`mapper/CLAUDE.md`.
+scaffolding, along with a pile of superseded untracked data in `mapper/data/`. srv10 cherry-pick
+started: `meridian_2014`, `minisc_2026`, `over_gb` copied over directly (no `/media3` archive on
+srv10's single-disk hardware, real copies not symlinks). Found but not fixed: `MapFrame`'s
+iframe height is hardcoded 731px, not dynamic like `NaviFrame`/`FormFrame` already are - most of
+today's mapsets are taller than that, forcing a scrollbar that clips the pan-arrow overlay
+controls. Full detail — every mapset's layer/scale choices, exact bug mechanics, skip-worktree
+setup, the MapFrame follow-up — in `mapper/CLAUDE.md`.
 
 ### 2026-07-29 (cont'd) — mapper document.write() elimination completed, merg onboarded, infra cleanup
 **mapper:** corrected the "unbalanced tree" misreading (see Active thread above), then eliminated
