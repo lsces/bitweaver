@@ -91,10 +91,14 @@ stock and contact packages
 - JavaScript tidy — other areas beyond util/javascript
 - **mapper "unbalanced tree" (document.write() elimination) — done 2026-07-29.** Every file
   fixed, deployed, verified on srv9+srv10; German→English pass done alongside. Full detail in
-  `mapper/CLAUDE.md`. **Next mapper thread:** what to actually do with the ~1.1GB of OS mapping
-  data already sitting in `mapper/data/` (currently unused beyond being on disk), or revisiting
-  an OSRM routing replacement (currently dead, no running instance anywhere) — not scoped yet,
-  pick one starting point next session.
+  `mapper/CLAUDE.md`.
+- **mapper Meridian vector mapset — built 2026-07-30, desktop-only.** New `map/meridian.map`
+  wires up the ~1.1GB OS Meridian 2 vector dataset sitting in `mapper/data/meridian/` (roads,
+  rail, settlements, boundaries, water, woodland) as a new `'meridian'` mapset; verified via
+  direct `mapserv` CGI render (whole-GB overview + zoomed London test both correct). Also found
+  `OS250.map` is dead scaffolding — its raster layers have no actual tile data behind them. Full
+  detail in `mapper/CLAUDE.md`. Not yet deployed/committed. OSRM routing replacement still dead,
+  no running instance anywhere — unscoped, revisit separately.
 
 ### Pending
 - webtrees data/images separation (buried in app, needs separating like bitweaver storage)
@@ -130,10 +134,17 @@ Permissions assigned in `*/admin/schema_inc.php`. Role assignments stored in
 with `array_keys($gBitUser->mRoles ?? []) ?: [-1]` — Firebird rejects empty `IN()`.
 
 ### Session / Auth cookie
-Cookie name = `bit-user-{site_title_stripped}` (lowercase, alphanum only).
+Cookie name = `bit-user-{site_title_stripped}` (lowercase, alphanum only) — compute from
+`kernel_config.site_title` (strip non-alnum, lowercase).
 Login stores PHP `session_id()` in `users_cnxn.cookie` mapped to `user_id`.
 Subsequent requests look up the cookie value in `users_cnxn` to identify the user —
 this is separate from PHP's own session mechanism (though they share the same cookie name).
+
+**Testing authenticated flows without a password**: `INSERT INTO users_cnxn (user_id, cookie,
+ip, last_get, connect_time, get_count) VALUES (<user_id>, '<random hex>', '127.0.0.1', <epoch>,
+<epoch>, 1)`, then send that same value as the `bit-user-{site}` cookie in curl. Confirmed
+working 2026-07-31 (smoke-testing a wiki save fix end-to-end). Clean up the row afterward
+(`DELETE FROM users_cnxn WHERE cookie = '...'`) — it's not session-expiring on its own.
 
 See `themes/CLAUDE.md` for: navbar menu, CSS load order, Smarty notes, module/layout
 system, site-specific theme overrides.
