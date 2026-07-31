@@ -92,13 +92,14 @@ stock and contact packages
 - **mapper "unbalanced tree" (document.write() elimination) — done 2026-07-29.** Every file
   fixed, deployed, verified on srv9+srv10; German→English pass done alongside. Full detail in
   `mapper/CLAUDE.md`.
-- **mapper Meridian vector mapset — built 2026-07-30, desktop-only.** New `map/meridian.map`
-  wires up the ~1.1GB OS Meridian 2 vector dataset sitting in `mapper/data/meridian/` (roads,
-  rail, settlements, boundaries, water, woodland) as a new `'meridian'` mapset; verified via
-  direct `mapserv` CGI render (whole-GB overview + zoomed London test both correct). Also found
-  `OS250.map` is dead scaffolding — its raster layers have no actual tile data behind them. Full
-  detail in `mapper/CLAUDE.md`. Not yet deployed/committed. OSRM routing replacement still dead,
-  no running instance anywhere — unscoped, revisit separately.
+- **mapper OS-Data mapsets — built + deployed 2026-07-31.** Real mapsets built from the archived
+  OS-Data library (`meridian_2014`/`_2016`, `minisc_2019`/`_2026`, `opmplc_2020`/`_2026`,
+  `vmdvec_2020`/`_2026`, `over_gb`, `zoomstack_2026`) — deployed to srv9 (full data, symlinked
+  from the archive) and to srv10 as code-only so far (data cherry-pick still pending). Access now
+  properly gated behind the mapper permission system, which turned out to have never been
+  enforced at all before this session. `OS250.map` removed entirely (dead scaffolding, never had
+  real tile data behind its tileindexes). Full detail in `mapper/CLAUDE.md`. OSRM routing
+  replacement still dead, no running instance anywhere — unscoped, revisit separately.
 
 ### Pending
 - webtrees data/images separation (buried in app, needs separating like bitweaver storage)
@@ -171,6 +172,40 @@ structure and logrotate gotchas, fail2ban (jails, known limitations), and nginx-
 ## Session Management
 At the end of each productive session, append discoveries, decisions, and completed items to this file.
 Use `/clear` to reset context when it gets bloated — this file re-orients the session.
+
+### 2026-07-31 — mapper OS-Data mapsets built + deployed, permission system fixed, mapfile path bugs found+fixed
+Worked through the archived OS-Data library into real mapsets rather than leaving it speculative:
+`meridian` renamed to `meridian_2014` (confirmed true vintage via file mtimes) with
+`meridian_2016` added alongside — both kept, not swapped, per the never-replace-historic-editions
+principle (see `[[feedback_mapper_historic_no_replace]]`). New mapsets: `minisc_2019`/`_2026` (OS
+MiniScale raster), `opmplc_2020`/`_2026` (OS Open Map Local, GeoPackage vector),
+`vmdvec_2020`/`_2026` (OS VectorMap District), `over_gb` (GB overview raster, both editions
+combined into one mapset), `zoomstack_2026` (OS Open Zoomstack, all 21 layers). `omlras_gtfc_gb`
+(raster tiles, 10,591 files) and `pancon_gb_2016` (DXF contours) investigated but set aside — the
+former superseded by the simpler GeoPackage vector route, the latter deferred (no embedded CRS,
+would need a tileindex). `mapper_mapsets.php` gained a `dataDir` gate so the same registry file
+deploys to both srv9 (full archive) and srv10 (cherry-picked subset) without duplication.
+
+Found and fixed two real bugs along the way, both invisible until today because nobody could
+actually reach the affected code paths before: (1) `display_map.php` passed the raw, unvalidated
+mapset key to `script.php`'s `scriptURL` instead of the resolved one, breaking the whole frame
+choreography on a stale link; (2) the mapper package's 5 permissions were declared in
+`schema_inc.php` but never actually synced to the database, so the entire module — including the
+public demo — was open to anonymous users with zero access control. Fixed properly via the admin
+installer's own permission-cleanup mechanism (not hand-written SQL — see
+`[[feedback_installer_permission_cleanup]]`), then wired up `verifyPermission()` calls plus a
+graceful demo fallback instead of a login wall for a bare URL.
+
+Separately chased down why `test_rlp.map` (the one public/portable demo mapfile) worked on
+desktop but not on either server: `lsces/mapper` is a symlink to the shared `_bw5/mapper`
+checkout, and MapServer resolves relative paths against that *real* location, not the apparent
+per-site path — so a relative path can never correctly reach site-specific storage. Fixed with
+`git update-index --skip-worktree` so GitHub/desktop keep the clean portable version while each
+server carries its own local, un-synced override. `OS250.map` (same hardcoded-path bugs, plus
+invalid syntax, plus tile data that was never actually downloaded) removed entirely as dead
+scaffolding, along with a pile of superseded untracked data in `mapper/data/`. Full detail —
+every mapset's layer/scale choices, exact bug mechanics, skip-worktree setup — in
+`mapper/CLAUDE.md`.
 
 ### 2026-07-29 (cont'd) — mapper document.write() elimination completed, merg onboarded, infra cleanup
 **mapper:** corrected the "unbalanced tree" misreading (see Active thread above), then eliminated
