@@ -173,6 +173,26 @@ structure and logrotate gotchas, fail2ban (jails, known limitations), and nginx-
 At the end of each productive session, append discoveries, decisions, and completed items to this file.
 Use `/clear` to reset context when it gets bloated — this file re-orients the session.
 
+### 2026-08-01 — mapper MapFrame scrollbar/clipped-arrows bug found + fixed
+Once the permission fix (below) made the newer mapsets actually viewable in a real browser, a
+real display bug surfaced: a vertical scrollbar inside `MapFrame`, clipping the pan arrows.
+Chased through several wrong turns first - dynamic frame resizing, a suspected mapfile `SIZE`
+vs frame-size mismatch (confirmed via `html/map_init.html` that MapServer always renders at
+whatever size the frame requests dynamically, so this wasn't it), and a full hand-trace of
+`common.js`'s absolutely-positioned layer math (confirmed correct by construction, verified live
+via browser console). Actual cause: `scripts/layer.js`'s layer-creation functions used
+`overflow:inherit` instead of `overflow:hidden`, so a few pixels of inline-`<img>`
+baseline-alignment "phantom space" bled out past each layer's box and accumulated into a real
+page-level scrollbar. Fixed with `overflow:hidden` (layer.js) + `display:block` on every injected
+`<img>` in `map.html` (removes the offset at the source - needed both, since `overflow:hidden`
+alone clipped the 8px-tall North/South pan buttons almost entirely). Deployed to srv9 and srv10;
+also caught and fixed a real deploy gap along the way (an earlier `resizeMapFrame()` revert had
+only ever been made locally on desktop, never pushed, so the servers were still running a stale
+version even after the "real" fix was deployed - worth remembering that reverts need pushing too,
+not just forward changes). Full detail, including the wrong turns and a testing gotcha (browser
+reload button mangles this frameset's load choreography - use the address bar instead) in
+`mapper/CLAUDE.md`.
+
 ### 2026-07-31 — mapper OS-Data mapsets built + deployed, permission system fixed, mapfile path bugs found+fixed
 Worked through the archived OS-Data library into real mapsets rather than leaving it speculative:
 `meridian` renamed to `meridian_2014` (confirmed true vintage via file mtimes) with
