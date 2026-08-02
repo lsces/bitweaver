@@ -162,6 +162,9 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
 - `wiki/CLAUDE.md` — BitPage::store() missing RollbackTrans bug (intermittent "page not found")
 - `mapper/CLAUDE.md` — MapServer viewer, frame/JS context split, selectable mapsets
   (script.php/mapsets_inc.php), storage/maps vs storage/mapper, CGI param semantics
+- `protector/CLAUDE.md` — permission-check-unreachable bug (fixed 2026-08-02): anonymous/
+  unauthorized access to protector-restricted content fell through to a generic "page not
+  found" instead of the login/permission-denied prompt
 
 ## Infrastructure
 Detail lives in `/etc/webstack/CLAUDE.md` — its own repo, own `CLAUDE.md`, same pattern as the
@@ -172,6 +175,24 @@ structure and logrotate gotchas, fail2ban (jails, known limitations), and nginx-
 ## Session Management
 At the end of each productive session, append discoveries, decisions, and completed items to this file.
 Use `/clear` to reset context when it gets bloated — this file re-orients the session.
+
+### 2026-08-02 — protector permission-check-unreachable bug found + fixed site-wide
+Making a wiki page private via Protector showed anonymous users a generic "page cannot be
+found" (410) instead of a login prompt. Root cause: `protector_content_verify_access()` —
+which already correctly calls `fatalPermission()` for anonymous/unauthorized users — was
+never actually reachable. Two compounding bugs, both fixed within protector's own logic per
+the reference above: every `content_load_sql_function` call site except `LibertyComment`
+omitted the object argument to `getServicesSql()`, so protector's hook always got `null`
+and gave up; and protector's own guard trusted each content type's `isValid()`, which for
+`BitPage` checks `mPageId` (only set after a successful load) rather than `mContentId`
+(already valid beforehand) — fixed to check `mContentId` directly. Confirmed via direct code
+reads and live testing (not just an Explore agent's report) that `mContentId` is reliably
+pre-populated on the normal content-resolution path (`getLibertyObject()` →
+`new $class(null, $contentId)`), so this holds generally, not just for wiki. Fixed at 7
+call sites across wiki, blogs, fisheye, stock, and users (all mirroring the one already-
+correct `LibertyComment` pattern) plus the protector guard itself. Verified live on desktop
+for all three permission states, then on srv9 and srv10 for the real reported page. Full
+detail in `protector/CLAUDE.md`.
 
 ### 2026-08-01 — mapper MapFrame scrollbar/clipped-arrows bug found + fixed
 Once the permission fix (below) made the newer mapsets actually viewable in a real browser, a
