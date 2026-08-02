@@ -102,6 +102,12 @@ stock and contact packages
   replacement still dead, no running instance anywhere — unscoped, revisit separately.
 
 ### Pending
+- **NEXT SESSION FIRST** — login frame/box now sliding under the left-hand edge of the page.
+  Surfaced right after the 2026-08-02 protector fix started routing anonymous users through
+  `fatalPermission()` / `login_inc.tpl` far more often (previously unreachable for most content
+  types, see `protector/CLAUDE.md`) — plausibly a pre-existing CSS/layout issue on that template
+  that just wasn't being hit in practice before, but not confirmed yet. Not investigated at all —
+  start fresh.
 - webtrees data/images separation (buried in app, needs separating like bitweaver storage)
 - externals/composer halfway-house — ckeditor and util-type dependencies
 - `/srv/git/bitweaver` → nginx wiring (infrastructure thread, separate from code work)
