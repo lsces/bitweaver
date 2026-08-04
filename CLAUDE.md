@@ -197,6 +197,24 @@ structure and logrotate gotchas, fail2ban (jails, known limitations), and nginx-
 At the end of each productive session, append discoveries, decisions, and completed items to this file.
 Use `/clear` to reset context when it gets bloated — this file re-orients the session.
 
+### 2026-08-04 (cont'd, 2) — OSM tile server prototype built + wired into the mapper viewer
+Built a full slippy-map tile server on desktop from scratch (PostGIS/osm2pgsql/Mapnik/renderd,
+OS-atlas road-colour styling per the earlier-flagged direction) and, after proving each piece
+standalone, wired it into the existing `mapper` viewer as a new selectable mapset
+(`osm_tiles_iom`) rather than a separate page — confirmed working live by the user. Real
+measured IOM tile-cache size (145MB, z6-18) answered the earlier "how much disk space" question
+with actual numbers instead of a guess. Found and fixed two real bugs along the way: a 9x
+disk-space blowup from naively flattening metatiles to individual files (avoided by writing a
+small PHP script that reads tiles straight out of renderd's metatiles instead, path-hash formula
+reverse-engineered from real files, not guessed), and a `render_list --all` bbox-mode coverage
+gap at the extent boundary (fixed by computing exact tile ranges directly rather than trusting
+its lat/lon bbox math). Also found desktop's local `lsces` vhost resolves mapfiles against
+`bitweaver5/mapper/map/` directly, not `lsces/mapper/map/` like the real servers - none of the
+other private mapsets had ever actually been exercised through desktop's own vhost before this.
+Full detail in `mapper/CLAUDE.md` and the `project_osm_tile_server` memory. Deliberately stopped
+at desktop-only — committed to the webstack and mapper package repos, not yet pushed to
+srv9/srv10, picking back up next session.
+
 ### 2026-08-04 (cont'd) — osm_gb_2012/osm_iom_2012 historic mapsets built + deployed to srv9
 Built the first actual mapsets from the 2012 OSM planet dump acquired earlier today, using
 `osm_gb`/`osm_iom`'s exact recipe (gpkg build, coastline reuse, registry wiring). Deliberately
