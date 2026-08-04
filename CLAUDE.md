@@ -92,22 +92,19 @@ stock and contact packages
 - **mapper "unbalanced tree" (document.write() elimination) — done 2026-07-29.** Every file
   fixed, deployed, verified on srv9+srv10; German→English pass done alongside. Full detail in
   `mapper/CLAUDE.md`.
-- **mapper OS-Data mapsets — built + deployed 2026-07-31.** Real mapsets built from the archived
-  OS-Data library (`meridian_2014`/`_2016`, `minisc_2019`/`_2026`, `opmplc_2020`/`_2026`,
-  `vmdvec_2020`/`_2026`, `over_gb`, `zoomstack_2026`) — deployed to srv9 (full data, symlinked
-  from the archive) and to srv10 as code-only so far (data cherry-pick still pending). Access now
-  properly gated behind the mapper permission system, which turned out to have never been
-  enforced at all before this session. `OS250.map` removed entirely (dead scaffolding, never had
-  real tile data behind its tileindexes). Full detail in `mapper/CLAUDE.md`. OSRM routing
-  replacement still dead, no running instance anywhere — unscoped, revisit separately.
+- **mapper OS-Data mapsets — built + deployed 2026-07-31, srv9 storage tidied 2026-08-03.** Real
+  mapsets built from the archived OS-Data library (`meridian_2014`/`_2016`, `minisc_2019`/`_2026`,
+  `opmplc_2020`/`_2026`, `vmdvec_2020`/`_2026`, `over_gb`, `zoomstack_2026`) — deployed to srv9
+  (full archive, `storage/mapper` now symlinks throughout, no physical duplicates left) and to
+  srv10 as a deliberately smaller real-copy subset (single-disk hardware, no `/media3`/`/media4`
+  equivalent to symlink from — confirmed fine to leave as-is, not pending). Access properly gated
+  behind the mapper permission system, which turned out to have never been enforced at all before
+  this work. `OS250.map` removed entirely (dead scaffolding, never had real tile data behind its
+  tileindexes). Full detail in `mapper/CLAUDE.md`. OSRM routing replacement still dead, no
+  running instance anywhere — unscoped. **Paused here — next mapper session starts a different
+  approach, not a continuation of this thread.**
 
 ### Pending
-- **NEXT SESSION FIRST** — login frame/box now sliding under the left-hand edge of the page.
-  Surfaced right after the 2026-08-02 protector fix started routing anonymous users through
-  `fatalPermission()` / `login_inc.tpl` far more often (previously unreachable for most content
-  types, see `protector/CLAUDE.md`) — plausibly a pre-existing CSS/layout issue on that template
-  that just wasn't being hit in practice before, but not confirmed yet. Not investigated at all —
-  start fresh.
 - webtrees data/images separation (buried in app, needs separating like bitweaver storage)
 - externals/composer halfway-house — ckeditor and util-type dependencies
 - `/srv/git/bitweaver` → nginx wiring (infrastructure thread, separate from code work)
@@ -153,6 +150,24 @@ ip, last_get, connect_time, get_count) VALUES (<user_id>, '<random hex>', '127.0
 working 2026-07-31 (smoke-testing a wiki save fix end-to-end). Clean up the row afterward
 (`DELETE FROM users_cnxn WHERE cookie = '...'`) — it's not session-expiring on its own.
 
+**Don't dig for these — they're predictable, simple expansions of each domain's short name**
+(the same short form used as the Firebird DB alias, e.g. `lsces` for `lsces.uk`, `medw`, `merg`):
+- **DB alias** = bare domain name, no TLD. Same alias on desktop (local dev copy), srv9, srv10.
+- **Cookie name** = `bit-user-<shortname>mainsite` — e.g. `bit-user-lscesmainsite` for lsces.
+  This is `BitSystem`'s computed value from `site_title`, cached on disk in
+  `config/kernel/auth_config.php` (`session_name(...)`) if you ever need to confirm it exactly
+  rather than deriving it — no need to query `kernel_config` via isql for this.
+- **Test user for the `users_cnxn` trick**: use `user_id = 3` on the target site's DB, not `1` —
+  `1` is `root`, a placeholder account, not a real login with normal role assignments.
+- **Reaching each environment over HTTPS with the real domain**: srv10 is production, answers on
+  the bare domain (`https://lsces.uk`) — this is also what public DNS resolves to. srv9 (test/DR)
+  answers on the same domain with `:8443` appended (`https://lsces.uk:8443`) via a manual router
+  port-forward that's toggled off overnight (see `project_srv9_8443_schedule` memory) — if that's
+  off, or you're already SSH'd into srv9 and want to bypass DNS/the router entirely, use `curl -k
+  --resolve <domain>:443:127.0.0.1 https://<domain>/...` run from srv9 itself (see
+  `reference_srv9_web_testing` memory). Desktop uses the bare short name with no domain/port at
+  all (its own local vhost + local DB copy) when working from the desktop directly.
+
 See `themes/CLAUDE.md` for: navbar menu, CSS load order, Smarty notes, module/layout
 system, site-specific theme overrides.
 
@@ -181,6 +196,66 @@ structure and logrotate gotchas, fail2ban (jails, known limitations), and nginx-
 ## Session Management
 At the end of each productive session, append discoveries, decisions, and completed items to this file.
 Use `/clear` to reset context when it gets bloated — this file re-orients the session.
+
+### 2026-08-04 (cont'd) — osm_gb_2012/osm_iom_2012 historic mapsets built + deployed to srv9
+Built the first actual mapsets from the 2012 OSM planet dump acquired earlier today, using
+`osm_gb`/`osm_iom`'s exact recipe (gpkg build, coastline reuse, registry wiring). Deliberately
+built on desktop rather than srv9 — noticeably faster hardware, GB gpkg took 2m22s vs. ~50min for
+the much bigger current-day build. `osm_iom_2012` requested and built alongside `osm_gb_2012` in
+the same pass. Coastline layer and reference thumbnails both reuse the existing current-day
+assets outright rather than rebuilding — real coastlines don't move in 12 years. Verified live via
+`mode=browse` and an authenticated registry-resolution check (caught a real test-methodology trap
+along the way: `lsces.uk` resolves to production/srv10, not srv9 — `curl --resolve` needed to
+actually test srv9 directly, now in `[[reference_srv9_web_testing]]`). Deployed to srv9 only, not
+promoted to srv10. Full detail in `mapper/CLAUDE.md`.
+
+### 2026-08-04 — mapper OSM coastline+historic-dumps work, media3/media4 drift fixed, fail2ban root-caused and two jails retired
+**mapper:** `osm_iom.map`/`osm_gb.map` coastline layers (real OSM water-polygon data, dissolved
++ flood-filled reference thumbnails), a real `GROUP`/layer-`NAME` collision bug found+fixed, and
+first steps into OSM historic planet dumps (2012 acquired+archived+GB-clipped, 2020 downloading).
+Full detail in `mapper/CLAUDE.md`.
+
+**fail2ban:** root-caused a 90s shutdown delay back to `nginx-444`'s ban backlog + the default
+banaction; switched to an `ipset`-backed action (two more real bugs found along the way), then
+retired both `nginx-444` and `nginx-botsearch` outright as redundant/no-longer-needed rather than
+just patching them. Also fixed a media3/media4 archive drift (Films, an OS-Data set, the
+`osm-update` cron mirror). Full detail in `/etc/webstack/CLAUDE.md`.
+
+**Desktop toolchain cleanup:** traced pdfarranger/ocrmypdf/img2pdf breakage to a dead October-2024
+pip environment shadowing the real installs; removed it plus the orphaned `python312` RPM stack
+and unused `recoll`/`python311`. No CLAUDE.md of its own — desktop-local housekeeping, not
+project code.
+
+### 2026-08-03 — error.tpl login-box misalignment fixed, srv9 firebird-restore run, post-login redirect port bug fixed
+Resolved the "NEXT SESSION FIRST" login frame/box CSS issue carried over from 2026-08-02:
+root cause was `kernel/templates/error.tpl` being the only template site-wide with
+`class="body row"` on its outer wrapper, plus a second `<div class="row">` wrapping
+`{include file=$template}` — both spurious Bootstrap `.row`s (each contributing -15px margin)
+stacked and pushed the inline login form left past the container edge. Fixed by stripping both
+`row` classes (confirmed live — space restored, aligned with the module frames). Deployed to
+the `kernel` package repo and pulled to srv9.
+
+Ran `firebird-restore` on srv9 to mirror srv10's database + storage (a wiki page existed on
+srv10 but not srv9). Verified first: srv10 had a current same-day backup; srv9's own
+`storage/backup/` was stale (last 2026-07-29) but the script's own rsync step pulls through the
+latest before running `gbak`, and `storage/mapper` is excluded from that rsync regardless of its
+physical-folder/symlink mix (see mapper tidy-up below). Restore ran clean across all 9 domains;
+`lsces.fdb` rebuilt from the same-day backup, old db kept as `.fdb.old`.
+
+Found + fixed a real bug while testing the above via srv9's `:8443` DR-failover port:
+`users/validate.php`'s post-login redirect compared `$_SERVER['HTTP_HOST']` (includes the port
+on non-standard ports) directly against `parse_url($_SERVER['HTTP_REFERER'])`'s `host` (never
+includes the port) — so on non-standard-port access the comparison silently failed,
+`$_SESSION['loginfrom']` never got set, and login fell back to the user's home page instead of
+the originally-requested page. Confirmed this is specific to non-standard-port access — normal
+desktop and srv10 traffic (standard `:443`) was never actually affected, despite an initial
+suspicion it might be a wider "unlogged hole"; only srv9's `:8443` forward ever exercised it.
+Fixed with `strtok( $_SERVER['HTTP_HOST'], ':' )`; deployed to the `users` package repo and
+pulled to both srv9 and srv10.
+
+While sanity-checking the restore, also found and tidied two lingering physical (non-symlink)
+directories in srv9's `storage/mapper/` — `meridian_2014` and `iom_years` — now matching
+desktop's all-symlinked pattern. Full detail in `mapper/CLAUDE.md`.
 
 ### 2026-08-02 — protector permission-check-unreachable bug found + fixed site-wide
 Making a wiki page private via Protector showed anonymous users a generic "page cannot be
