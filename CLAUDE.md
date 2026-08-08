@@ -181,8 +181,10 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
 - `stock/CLAUDE.md` — file naming, movement model (REQN/PBLD/TRANS/ORDER), template
   structure, multi-user kitelf filtering, getList() enriched fields
 - `wiki/CLAUDE.md` — BitPage::store() missing RollbackTrans bug (intermittent "page not found")
-- `mapper/CLAUDE.md` — MapServer viewer, frame/JS context split, selectable mapsets
-  (script.php/mapsets_inc.php), storage/maps vs storage/mapper, CGI param semantics
+- `mapper/CLAUDE.md` — session log (decisions, bugs found, open follow-ups); `mapper/MANUAL.md` —
+  current-state reference (architecture, Map content object/xref schema, tile caching, pretty
+  URLs, permissions, deployment topology incl. `rdmcloud.uk`) — read MANUAL.md first for "how
+  does this work", CLAUDE.md for "why is it built this way"
 - `protector/CLAUDE.md` — permission-check-unreachable bug (fixed 2026-08-02): anonymous/
   unauthorized access to protector-restricted content fell through to a generic "page not
   found" instead of the login/permission-denied prompt
