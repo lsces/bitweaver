@@ -207,6 +207,23 @@ structure and logrotate gotchas, fail2ban (jails, known limitations), and nginx-
 At the end of each productive session, append discoveries, decisions, and completed items to this file.
 Use `/clear` to reset context when it gets bloated — this file re-orients the session.
 
+### 2026-08-08 (cont'd, 3) — rdmcloud DR/dev topology completed, cert-sync gap + real exposure risk fixed
+Picked up the "left for later" thread from earlier today's `rdmcloud.uk` build (see
+`mapper/CLAUDE.md`'s own entry for that): its backup/DR coverage now spans desktop, srv9, and
+srv10 properly — a new srv9-only `rdmcloud-backup` cron job (reverse topology vs. every other
+domain, since `rdmcloud`'s live source is srv9 not srv10), srv10 fully populated as a passive
+un-enabled DR standby, and desktop given a real accessible copy (own nginx vhost, own restored
+database). `firebird-backup`/`firebird-restore` also gained optional domain-selection args so a
+single site can be backed up/reverted without touching the other 9.
+
+Along the way: found and fixed `cert-sync-reload.sh` only ever pushing renewed certs to srv9, not
+desktop (desktop's copy had silently expired); a one-time SSH host-key gap between srv9 and
+desktop (key already trusted, that direction just never used before); and a real near-miss —
+a first attempt at backing up the real (never-committed) `rdmcloud.uk` nginx vhost landed a copy
+directly in srv10's actively-reloaded `vhosts.d/`, which would have silently exposed the
+"hidden" site on the next routine cert renewal. Caught before any reload happened and relocated
+to a safe, git-tracked location instead. Full detail in `/etc/webstack/CLAUDE.md`.
+
 ### 2026-08-04 (cont'd, 2) — OSM tile server prototype built + wired into the mapper viewer
 Built a full slippy-map tile server on desktop from scratch (PostGIS/osm2pgsql/Mapnik/renderd,
 OS-atlas road-colour styling per the earlier-flagged direction) and, after proving each piece
