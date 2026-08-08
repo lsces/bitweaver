@@ -20,6 +20,14 @@ own **individual git repo** under `~/Development/bitweaver-lsces/<package>/`.
 Proven changes are copied to the matching package repo — normally by CC directly,
 with BeyondCompare used for manual review when needed.
 
+`~/Development/bitweaver-lsces/` **itself** is *also* a git repo (own `.git`, pushes to
+`github.com:lsces/bitweaver.git`) — separate from every per-package repo living inside it as a
+subdirectory. This top-level `CLAUDE.md` (and anything else cross-package/org-level, not
+belonging to one specific package) lives there — copy to `~/Development/bitweaver-lsces/CLAUDE.md`
+directly, commit+push in that repo, same as any package. Don't confuse this with `/srv/git/bitweaver`
+(a bare repo for nginx-serving, unrelated, not yet wired up — see the NOTE below) or with
+`/etc/webstack`'s own separate repo (server config, different bare repo entirely).
+
 Deploy steps:
 1. Copy changed files to `~/Development/bitweaver-lsces/<package>/`
 2. Commit in that package's git repo
