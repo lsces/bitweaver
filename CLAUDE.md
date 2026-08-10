@@ -248,7 +248,17 @@ opened for.
   `srv9-backup` back on 2026-08-08 (memory still said the old name); acme.sh cert renewal actually
   fires at 11:43 daily, not overnight, so it's out of scope for this check; desktop's `status.php`
   is reached via any local-\* vhost domain except the `.uk`-suffixed real ones (e.g.
-  `https://rdmcloud/status.php`), not the HTTP-only `rdm1` vhost.
+  `https://rdmcloud/status.php`), not the HTTP-only `rdm1` vhost. **Third session, same
+  day** — stock/contact package work: fixed a Date-sort crash in `list_movements`, built
+  per-assembly BOM tabs + `entry_date`-based multi-assembly line grouping, a working
+  PBLD→REQN conversion, an `isValid()` black-hole fix in stock+contact (a `LibertyContent`-
+  wide version was tried and reverted — real risk found in `storePreference()`/user
+  registration), and browser upload for the Kitlocker stock-predict sync. Renamed
+  `contact/display_contact.php` → `view.php`, deleted dead `list1.php`/`list2.php`.
+  Consolidated desktop's independently-drifted per-vhost nginx rewrite blocks into one
+  shared include (production's shared file also gained the contact/stock rules it never
+  had). Detail `stock/CLAUDE.md`, `contact/CLAUDE.md`, `liberty/CLAUDE.md`,
+  `/etc/webstack/CLAUDE.md`.
 - **2026-08-08** — rdmcloud DR/dev topology completed across desktop/srv9/srv10 (`rdmcloud-backup`
   cron, srv10 passive standby, desktop real copy); `cert-sync-reload.sh` desktop-push gap fixed;
   a near-miss srv10 vhost-exposure risk caught before going live. Detail `/etc/webstack/CLAUDE.md`.
