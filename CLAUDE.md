@@ -215,7 +215,13 @@ of this file for the fuller prose if ever needed.
   open blocked the nightly restore); `firebird-restore` made safe-swap so a failed restore can
   never wipe a domain's `.fdb` again, `srv9-backup` now kills FlameRobin first. Also pruned this
   file and `/etc/webstack/CLAUDE.md`'s session logs (~41% smaller combined). Detail
-  `/etc/webstack/CLAUDE.md`.
+  `/etc/webstack/CLAUDE.md`. **Second session, same day** — full overnight-rollover check (backups,
+  disk, SMART/temps, fail2ban, services, `status.php` on all three machines): all green, nothing
+  to action. Corrected stale memory along the way: `rdmcloud-backup` cron was renamed to
+  `srv9-backup` back on 2026-08-08 (memory still said the old name); acme.sh cert renewal actually
+  fires at 11:43 daily, not overnight, so it's out of scope for this check; desktop's `status.php`
+  is reached via any local-\* vhost domain except the `.uk`-suffixed real ones (e.g.
+  `https://rdmcloud/status.php`), not the HTTP-only `rdm1` vhost.
 - **2026-08-08** — rdmcloud DR/dev topology completed across desktop/srv9/srv10 (`rdmcloud-backup`
   cron, srv10 passive standby, desktop real copy); `cert-sync-reload.sh` desktop-push gap fixed;
   a near-miss srv10 vhost-exposure risk caught before going live. Detail `/etc/webstack/CLAUDE.md`.
