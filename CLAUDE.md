@@ -225,7 +225,9 @@ something worse:
    - srv9: `https://rdm1.uk:8443/status.php`
    - desktop: any local-\* vhost domain except a `.uk` one, e.g. `https://rdmcloud/status.php`
      (see `reference_status_php` memory — the HTTP-only `rdm1` vhost is NOT the way in)
-5. Cert validity — check `notAfter` on srv10, srv9, and desktop are all current and in sync
+5. Cert validity — `openssl x509 -enddate -noout -in /etc/webstack/nginx/ssl/<domain>/fullchain.cer.ecc`
+   (real files are `.cer.ecc`, not `.crt`) for a couple of domains (e.g. `rdm1.uk`, `rdmcloud.uk`)
+   on srv10, srv9, and desktop — confirm `notAfter` is current and identical across all three
    (acme.sh only renews on srv10 at 11:43am, syncing out to srv9+desktop after — see
    `reference_cert_sync_topology` memory; a stale/expired copy on one machine has happened before
    and won't show up in any of the other checks here)
