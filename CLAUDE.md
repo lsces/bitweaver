@@ -211,6 +211,11 @@ relevant package `CLAUDE.md`, the linked memory, or git history, not duplicated 
 one-liners 2026-08-10 (was 3 dated entries deep per topic); nothing here was lost, see git history
 of this file for the fuller prose if ever needed.
 
+- **2026-08-10** — Morning system check found desktop's `rdmcloud.fdb` missing (FlameRobin left
+  open blocked the nightly restore); `firebird-restore` made safe-swap so a failed restore can
+  never wipe a domain's `.fdb` again, `srv9-backup` now kills FlameRobin first. Also pruned this
+  file and `/etc/webstack/CLAUDE.md`'s session logs (~41% smaller combined). Detail
+  `/etc/webstack/CLAUDE.md`.
 - **2026-08-08** — rdmcloud DR/dev topology completed across desktop/srv9/srv10 (`rdmcloud-backup`
   cron, srv10 passive standby, desktop real copy); `cert-sync-reload.sh` desktop-push gap fixed;
   a near-miss srv10 vhost-exposure risk caught before going live. Detail `/etc/webstack/CLAUDE.md`.
