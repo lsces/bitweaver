@@ -211,6 +211,31 @@ relevant package `CLAUDE.md`, the linked memory, or git history, not duplicated 
 one-liners 2026-08-10 (was 3 dated entries deep per topic); nothing here was lost, see git history
 of this file for the fuller prose if ever needed.
 
+### Sanity check
+Run this at the start of every new session that follows a `/clear` or a machine restart/reboot —
+cheap, all read-only, catches silent failures (overnight or otherwise) before they compound into
+something worse:
+1. Reachability — desktop/srv9/srv10 all up (`ssh root@srv9`/`srv10`, check `uptime`)
+2. Firebird backups fresh — `srv10-backup` (9 domains) and `srv9-backup` (`rdmcloud`, reverse
+   direction, srv9→srv10) ran overnight; check timestamps under a domain's `storage/backup/`
+3. `firebird-restore` clean — no stray `.fdb.old` sitting next to a live `.fdb`, FlameRobin not
+   left open on desktop (see `project_firebird_dr_topology` memory for the safe-swap mechanics)
+4. `status.php` on all three — disk/SMART/temps all GREEN:
+   - srv10: `https://rdm1.uk/status.php`
+   - srv9: `https://rdm1.uk:8443/status.php`
+   - desktop: any local-\* vhost domain except a `.uk` one, e.g. `https://rdmcloud/status.php`
+     (see `reference_status_php` memory — the HTTP-only `rdm1` vhost is NOT the way in)
+5. Cert validity — check `notAfter` on srv10, srv9, and desktop are all current and in sync
+   (acme.sh only renews on srv10 at 11:43am, syncing out to srv9+desktop after — see
+   `reference_cert_sync_topology` memory; a stale/expired copy on one machine has happened before
+   and won't show up in any of the other checks here)
+6. fail2ban — jails active, no unexpected ban spree overnight
+7. nginx/php-fpm active on both servers
+8. Spot-check one live page on srv9 (`:8443`) and srv10
+
+If any check comes back off, investigate before moving on to whatever the session was actually
+opened for.
+
 - **2026-08-10** — Morning system check found desktop's `rdmcloud.fdb` missing (FlameRobin left
   open blocked the nightly restore); `firebird-restore` made safe-swap so a failed restore can
   never wipe a domain's `.fdb` again, `srv9-backup` now kills FlameRobin first. Also pruned this
