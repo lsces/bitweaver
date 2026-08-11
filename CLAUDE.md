@@ -257,16 +257,49 @@ opened for.
   `_bw5` (2026-08-08). Found+removed a 1.2GB genuinely-obsolete standalone 2014-era mapper install
   under `lsces/` (verified byte-identical against `/home/media1/Maps/iom_years/` first); copied
   (not moved — srv10 still has them) `lsces/cgi-viewer`+`cgi-demos` to `rdmcloud` as a first step
-  toward consolidating MapServer test/demo content there. Vhost-root repointing (the actual
-  multi-site step) not yet done — next session. **Third thread, chasing an APCu tangent** — dug
+  toward consolidating MapServer test/demo content there. **Third thread, chasing an APCu tangent** — dug
   into whether `BitSystem`'s APCu object cache does anything useful; found and fixed a real,
   already-live production bug along the way: `BitBase::__destruct()` unset `mDb` before
   `storeInCache()` needed it, crashing `Contact`/`Stock*::isValid()` (4032 + 13 occurrences in
   srv10's current log, since 2026-08-10's `isValid()` fix first gave `getCacheKey()` a reason to
   need `mDb`) — fixed and deployed to srv9+srv10, confirmed no new occurrences after. `BIT_CACHE_OBJECTS`
   itself confirmed genuinely working via xdebug (a `Hits: 0` reading that looked like "cache never
-  read back" was actually just a display artifact of always-overwrite). Detail
-  `project_apcu_object_cache_stale_assets`, `reference_desktop_site_architecture` memories.
+  read back" was actually just a display artifact of always-overwrite). **Fourth thread, same
+  day — desktop multi-site actually finished.** `IS_LIVE`/`BIT_CACHE_OBJECTS`/`$smarty_force_compile`
+  made machine-aware (new shared `_machine_inc.php`, `gethostname()`-based) across all 9 domains'
+  webstack-source `config_inc.php`, desktop's copies converted from diverging real files to real
+  symlinks at the source, matching servers. All 9 `local-<site>.vhosts.conf` repointed from the
+  shared `bitweaver5` root to their own `/srv/website/<site>/` (3 hardcoded paths per file: root,
+  PHP-location root, attachments alias). Hit and fixed a real `externals/` divergence along the
+  way — `bitweaver5/externals` (actively used) had silently diverged from the sibling
+  `/srv/website/externals` (what every site's symlink actually pointed to, never exercised until
+  now) — different adodb version entirely, missing several packages. Archived the stale sibling,
+  promoted `bitweaver5/externals` to take its place. Also found+removed a small identical-content
+  `_bw5/externals/bootstrap-3.2` duplicate on both srv9 and srv10 while there. **All 9 desktop
+  domains now serve genuinely distinct content simultaneously** — `switch-site.sh` and the old
+  one-site-at-a-time model are obsolete. **Fifth thread, same day — theme/config tidy-up +
+  stragglers.** `config/themes/BlueSky` (fallback theme) was a real, independently-drifted copy in
+  every site directory on all three machines despite `/etc/webstack/site-config/themes/BlueSky`
+  already existing as the intended shared source — root cause was the shared source itself having
+  gone stale, not the copies; fixed by updating it to match live content, then symlinking all 10
+  domains (desktop/srv9/srv10) to it. Per-domain theme folders (`config/themes/<site>`) similarly
+  discarded and symlinked straight to the webstack source — bonus fix: this also resolved a real
+  broken-CSS bug on `garage-press`/`graham-ovenden` (absolute filesystem path in a CSS href,
+  stylesheets never actually loading despite 200 responses). Old pre-restructuring cruft under
+  `config/` (`css`/`fonts`/`images`/`js`/`bit_setup_inc.php`, confirmed absent from servers first)
+  removed from all 9. Two gaps caught only by re-sweeping *every* domain rather than trusting the
+  first pass: `rdmcloud`'s vhost had been skipped entirely from the repointing work (still pointed
+  at `bitweaver5`); none of the 10 site vhosts had an HTTP→HTTPS redirect at all (only `rdm1`
+  listened on port 80, silently becoming the catch-all for every domain, producing "file not
+  found" on any `http://<domain>/` hit) — added the same `listen 80; return 301 https://...;`
+  block every server vhost already has. Desktop's `config/` now byte-for-byte matches srv10's.
+  Detail `reference_desktop_site_architecture` (fully rewritten) and
+  `project_theme_symlink_consolidation` memories. **Separately, unrelated to any of the above**: a
+  live post-deploy check surfaced a real, likely long-standing gap on `myhomecloud.uk` — floaticons
+  render empty and the Administration menu's dropdown-submenu doesn't appear for either active
+  admin user, despite both having `role_id=1` correctly assigned. Not caused by this session
+  (myhomecloud doesn't use `BlueSky`, nothing else touched it) — parked for a dedicated session,
+  now testable on desktop instead of live. Detail `project_myhomecloud_floaticon_gap` memory.
 - **2026-08-10** — Morning system check found desktop's `rdmcloud.fdb` missing (FlameRobin left
   open blocked the nightly restore); `firebird-restore` made safe-swap so a failed restore can
   never wipe a domain's `.fdb` again, `srv9-backup` now kills FlameRobin first. Also pruned this
