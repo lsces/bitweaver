@@ -17,7 +17,6 @@ config/themes/
 /feed/
 /fisheye/
 /gatekeeper/
-/geo/
 /install/
 /kernel/
 /languages/
@@ -26,9 +25,7 @@ config/themes/
 /messages/
 /newsletters/
 /nexus/
-/pigeonholes/
 /protector/
-/quota/
 /rss/
 /search/
 /stats/
