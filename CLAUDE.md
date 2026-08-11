@@ -245,8 +245,28 @@ opened for.
 
 - **2026-08-11** — Morning sanity check all green (backups, certs, fail2ban, services, status.php).
   Found the 2026-08-10 FlameRobin fix was itself broken: `pkill -x flamerobin` (SIGTERM) reports
-  success but FlameRobin ignores it and keeps running; fixed to `pkill -9 -x` in `srv9-backup`,
-  deployed desktop/srv9/srv10. Detail `project_firebird_dr_topology` memory.
+  success but FlameRobin ignores it and keeps running; fixed to `pkill -9 -x` in `srv9-backup`.
+  `srv10-backup` extended to also restore desktop's *and* srv9's `.fdb` for its 9 domains (not
+  just refresh `storage/backup/`) — srv9 was previously left deliberately stale on a since-
+  invalidated theory; the rolling 10-backup history is the real hack-recovery protection, a DR
+  standby needs current data to be useful. **Second thread, same day** — desktop multi-site
+  brainwave: confirmed every `local-<site>` vhost still roots at the shared `bitweaver5` (only one
+  site "live" at a time); found and repaired real symlink drift across all 9 desktop site folders
+  (`stock` missing everywhere, `medw` missing `contact`, stale real-file `index.php` on 5 domains,
+  `install` dangling at nonexistent `../_bw4/`) via `setup-site-links.sh`, now safe to use post-
+  `_bw5` (2026-08-08). Found+removed a 1.2GB genuinely-obsolete standalone 2014-era mapper install
+  under `lsces/` (verified byte-identical against `/home/media1/Maps/iom_years/` first); copied
+  (not moved — srv10 still has them) `lsces/cgi-viewer`+`cgi-demos` to `rdmcloud` as a first step
+  toward consolidating MapServer test/demo content there. Vhost-root repointing (the actual
+  multi-site step) not yet done — next session. **Third thread, chasing an APCu tangent** — dug
+  into whether `BitSystem`'s APCu object cache does anything useful; found and fixed a real,
+  already-live production bug along the way: `BitBase::__destruct()` unset `mDb` before
+  `storeInCache()` needed it, crashing `Contact`/`Stock*::isValid()` (4032 + 13 occurrences in
+  srv10's current log, since 2026-08-10's `isValid()` fix first gave `getCacheKey()` a reason to
+  need `mDb`) — fixed and deployed to srv9+srv10, confirmed no new occurrences after. `BIT_CACHE_OBJECTS`
+  itself confirmed genuinely working via xdebug (a `Hits: 0` reading that looked like "cache never
+  read back" was actually just a display artifact of always-overwrite). Detail
+  `project_apcu_object_cache_stale_assets`, `reference_desktop_site_architecture` memories.
 - **2026-08-10** — Morning system check found desktop's `rdmcloud.fdb` missing (FlameRobin left
   open blocked the nightly restore); `firebird-restore` made safe-swap so a failed restore can
   never wipe a domain's `.fdb` again, `srv9-backup` now kills FlameRobin first. Also pruned this
