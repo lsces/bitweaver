@@ -14,25 +14,25 @@
 - Clean diffs matter more than PSR compliance for its own sake
 
 ## Deploy Path
-Code is edited and tested in `/srv/website/bitweaver5` (xdebug available).
-Each bitweaver package is a self-contained directory under `bitweaver5/`, with its
-own **individual git repo** under `~/Development/bitweaver-lsces/<package>/`.
-Proven changes are copied to the matching package repo — normally by CC directly,
-with BeyondCompare used for manual review when needed.
+**Updated 2026-08-11 — `bitweaver5` retired as the edit copy.** `/srv/website/_bw5` now symlinks
+straight to `~/Development/bitweaver-lsces` — code is edited and tested directly there (xdebug
+still available), no more copy-then-commit step. `/srv/website/bitweaver5` still exists on disk,
+untouched, but nothing points at it any more; don't edit there, it's orphaned.
 
-`~/Development/bitweaver-lsces/` **itself** is *also* a git repo (own `.git`, pushes to
-`github.com:lsces/bitweaver.git`) — separate from every per-package repo living inside it as a
-subdirectory. This top-level `CLAUDE.md` (and anything else cross-package/org-level, not
-belonging to one specific package) lives there — copy to `~/Development/bitweaver-lsces/CLAUDE.md`
-directly, commit+push in that repo, same as any package. Don't confuse this with `/srv/git/bitweaver`
-(a bare repo for nginx-serving, unrelated, not yet wired up — see the NOTE below) or with
-`/etc/webstack`'s own separate repo (server config, different bare repo entirely).
+Each bitweaver package is a self-contained directory under `~/Development/bitweaver-lsces/`, with
+its own **individual git repo**. That top-level directory is **itself** also a git repo (own
+`.git`, pushes to `github.com:lsces/bitweaver.git`) — separate from every per-package repo living
+inside it as a subdirectory. This top-level `CLAUDE.md` (and anything else cross-package/org-level,
+not belonging to one specific package) lives there directly now — edit it in place, commit+push in
+that repo, same as any package. Don't confuse this with `/srv/git/bitweaver` (a bare repo for
+nginx-serving, unrelated, not yet wired up — see the NOTE below) or with `/etc/webstack`'s own
+separate repo (server config, different bare repo entirely).
 
 Deploy steps:
-1. Copy changed files to `~/Development/bitweaver-lsces/<package>/`
+1. Edit directly in `~/Development/bitweaver-lsces/<package>/`
 2. Commit in that package's git repo
 3. `git push` — updates GitHub (publish-only, not part of the deploy chain)
-4. `/etc/webstack/scripts/server-pull-all.sh <package>` — pulls to srv9 and srv10 from the desktop's local copy
+4. `/etc/webstack/scripts/server-pull-all.sh <package>` — pulls to srv9 and srv10 from the desktop's local copy (run via `ssh root@srv9`/`srv10`, not directly from desktop)
 
 Servers do NOT pull from GitHub — they pull from the desktop's local copy.
 After pulling on a server, clear the Smarty template cache and restart php-fpm.
@@ -60,7 +60,7 @@ Do not roam into other packages unless explicitly asked.
 - `webtrees/` — separate application, has its own work thread
 - `vendor/` — composer-managed, do not touch
 - `externals/` — third-party libs, treat as read-only unless explicitly asked
-- `~/Development/` — not relevant to in-place editing
+- `/srv/website/bitweaver5` — retired 2026-08-11, orphaned, edit in `~/Development/bitweaver-lsces` instead
 - `/etc/nginx`, `/etc/php*` — not the source of truth, see /srv/webstack
 
 ## Patterns & Conventions
@@ -131,6 +131,14 @@ stock and contact packages
   2026-07-27 — myhomecloud's report shows ~10MB of this "dross" against ~1.7GB of real traffic,
   under 1%, not worth chasing yet. Revisit once the ratio grows or other domains' reports get
   reviewed. Do not action until asked — needs a real filename sample first, not a guessed list.
+- enquirysolve: real content/user recovery from `enquirysolve4.fdb` (old bw4-era DB, renamed
+  aside) — parked, needs a dedicated session. Web side (symlinks, config, `es.rdm1.uk` vhost/cert)
+  is done and live on a phpsurgery-copy DB in the meantime.
+- medw: 3 stray `bitboard` rows, confirmed nobody wants them — awaiting go-ahead to delete.
+- articles package: listing page doesn't find existing content (seen on both lsces and medw
+  despite real `bitarticle` rows) — parked, needs its own debugging session.
+- garage-press / graham-ovenden: `package_articles=y` in `kernel_config` despite zero content and
+  no actual need — deactivate via the installer, not urgent.
 
 ## Bitweaver Structure Notes
 
@@ -317,6 +325,26 @@ opened for.
   `themes/CLAUDE.md`, `project_colourstrap_cleanup` memory. Separately, found+committed the
   Fourth-thread machine-awareness `config_inc.php` changes above, which had been sitting
   completed-but-uncommitted in `/etc/webstack` since earlier that session.
+- **Seventh thread, same day — `bitweaver5` retired, `_bw5` repointed straight at
+  `bitweaver-lsces`.** Desktop was the last piece still using a non-git manual-copy edit workflow;
+  servers already pulled git-direct. Cleared two real blockers first: `geo`/`quota`/`pigeonholes`
+  (confirmed dead — no table in any of 11 site DBs, `geo` had zero symlinks anywhere) archived to
+  a new `~/Development/bitweaver-archive/` with git history intact, their symlinks/folders removed
+  from both servers; `webtrees` (not a git repo, not in `bitweaver-lsces` at all, but symlinked
+  from every site) decoupled entirely — real copy kept only under `myhomecloud` (matching what
+  srv9/srv10 already did natively), removed from the other 9. Repointed `_bw5`, hit one more
+  blocker (`/home/lester` was `700`, blocking nginx traversal — fixed with `chmod o+x`, minimal/
+  traverse-only), verified working. Along the way found and fixed a real authorization bypass:
+  `config/kernel/auth_check.php` was supposed to symlink to the shared `_bw5` copy everywhere
+  (already correct on servers) but every desktop site had a stale real copy instead — `merg`'s had
+  drifted into both branches of its role check returning 200 unconditionally, i.e. no actual
+  attachment protection. Fixed on all 10 sites, `setup-site-links.sh` now covers this
+  automatically. Separately onboarded `enquirysolve` (previously fully dangling on the dead `_bw4`
+  codebase, domain `enquirysolve.uk` also gone) to the same pattern, now live as `es.rdm1.uk` on
+  srv9+srv10 and `enquirysolve` on desktop — schema-upgrade lockout sidestepped by swapping in a
+  phpsurgery-copy DB rather than running the bw4→bw5 installer against real data; real data
+  recovery parked. Full detail `project_retire_bitweaver5`, `project_rdmcloud`,
+  `feedback_desktop_copies_never_autoupdate` memories.
 - **2026-08-10** — Morning system check found desktop's `rdmcloud.fdb` missing (FlameRobin left
   open blocked the nightly restore); `firebird-restore` made safe-swap so a failed restore can
   never wipe a domain's `.fdb` again, `srv9-backup` now kills FlameRobin first. Also pruned this
