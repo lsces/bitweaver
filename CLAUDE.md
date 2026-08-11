@@ -218,8 +218,13 @@ something worse:
 1. Reachability — desktop/srv9/srv10 all up (`ssh root@srv9`/`srv10`, check `uptime`)
 2. Firebird backups fresh — `srv10-backup` (9 domains) and `srv9-backup` (`rdmcloud`, reverse
    direction, srv9→srv10) ran overnight; check timestamps under a domain's `storage/backup/`
-3. `firebird-restore` clean — no stray `.fdb.old` sitting next to a live `.fdb`, FlameRobin not
-   left open on desktop (see `project_firebird_dr_topology` memory for the safe-swap mechanics)
+3. `firebird-restore` clean — no stray `.fdb.old` sitting next to a live `.fdb`. FlameRobin being
+   open on desktop is NOT itself a problem to flag — `srv9-backup` unconditionally `pkill -9 -x
+   flamerobin`s before its nightly restore call regardless of which domain's DB it has open (the
+   block is a per-file lock, not process-wide; must be `-9` — plain SIGTERM is caught/ignored, same
+   as its own Quit/End Application not working, fixed 2026-08-11), so an open session never
+   survives to interfere.
+   See `project_firebird_dr_topology` memory for the safe-swap mechanics.
 4. `status.php` on all three — disk/SMART/temps all GREEN:
    - srv10: `https://rdm1.uk/status.php`
    - srv9: `https://rdm1.uk:8443/status.php`
@@ -238,6 +243,10 @@ something worse:
 If any check comes back off, investigate before moving on to whatever the session was actually
 opened for.
 
+- **2026-08-11** — Morning sanity check all green (backups, certs, fail2ban, services, status.php).
+  Found the 2026-08-10 FlameRobin fix was itself broken: `pkill -x flamerobin` (SIGTERM) reports
+  success but FlameRobin ignores it and keeps running; fixed to `pkill -9 -x` in `srv9-backup`,
+  deployed desktop/srv9/srv10. Detail `project_firebird_dr_topology` memory.
 - **2026-08-10** — Morning system check found desktop's `rdmcloud.fdb` missing (FlameRobin left
   open blocked the nightly restore); `firebird-restore` made safe-swap so a failed restore can
   never wipe a domain's `.fdb` again, `srv9-backup` now kills FlameRobin first. Also pruned this
