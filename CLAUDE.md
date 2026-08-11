@@ -299,7 +299,24 @@ opened for.
   render empty and the Administration menu's dropdown-submenu doesn't appear for either active
   admin user, despite both having `role_id=1` correctly assigned. Not caused by this session
   (myhomecloud doesn't use `BlueSky`, nothing else touched it) — parked for a dedicated session,
-  now testable on desktop instead of live. Detail `project_myhomecloud_floaticon_gap` memory.
+  now testable on desktop instead of live. **Resolved same day, sixth thread** — see below.
+- **Sixth thread, same day — myhomecloud floaticon/dropdown bug fixed; base.css made generic;
+  colourstrap retired.** Root cause: `.dropdown-submenu` nested-dropdown CSS was hand-copied into 8
+  site theme CSS files (never generic), and `myhomecloud.css` simply never got the copy-paste;
+  separately, `myhomecloud.css`'s own `.floaticon img.icon` padding was wildly oversized, pushing
+  icons out of the visible area while they stayed clickable. Fixed at the root rather than
+  per-site-patched: `base.css` (the file that had the generic rules all along, just never loaded
+  reliably) now loads unconditionally for every site via a new `BitThemes.php` call at CSS position
+  301, right after `config.css` — no per-site `@import` opt-in needed any more. The 8 duplicate
+  `.dropdown-submenu` copies and 4 now-redundant `@import base.css` lines removed. Standalone
+  `colourstrap` theme (legacy, ~500 files, unused by any live domain) deleted; `BlueSky`'s own hacked
+  `colourstrap.css` copy also removed in favour of loading `bootstrap.css` directly. Deployed both
+  the themes package and `/etc/webstack` repos to srv9 then srv10, confirmed live. Two minor
+  regressions surfaced by the colourstrap removal (a dropdown colour loss, a `pkg_`-icon oversizing
+  issue) deliberately deferred — back-burner theme spring-clean, not actioned. Detail
+  `themes/CLAUDE.md`, `project_colourstrap_cleanup` memory. Separately, found+committed the
+  Fourth-thread machine-awareness `config_inc.php` changes above, which had been sitting
+  completed-but-uncommitted in `/etc/webstack` since earlier that session.
 - **2026-08-10** — Morning system check found desktop's `rdmcloud.fdb` missing (FlameRobin left
   open blocked the nightly restore); `firebird-restore` made safe-swap so a failed restore can
   never wipe a domain's `.fdb` again, `srv9-backup` now kills FlameRobin first. Also pruned this
