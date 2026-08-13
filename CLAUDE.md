@@ -10,8 +10,8 @@
 ## Deploy Path
 **Updated 2026-08-11 — `bitweaver5` retired as the edit copy.** `/srv/website/_bw5` now symlinks
 straight to `~/Development/bitweaver-lsces` — code is edited and tested directly there (xdebug
-still available), no more copy-then-commit step. `/srv/website/bitweaver5` still exists on disk,
-untouched, but nothing points at it any more; don't edit there, it's orphaned.
+still available), no more copy-then-commit step. `/srv/website/bitweaver5` itself has since been
+moved to `/srv/archive/bitweaver5` — it no longer exists at its old path, nothing points at it.
 
 Each bitweaver package is a self-contained directory under `~/Development/bitweaver-lsces/`, with
 its own **individual git repo**. That top-level directory is **itself** also a git repo (own
@@ -44,7 +44,7 @@ Do not roam into other packages unless explicitly asked.
 - `webtrees/` — separate application, has its own work thread
 - `vendor/` — composer-managed, do not touch
 - `externals/` — third-party libs, treat as read-only unless explicitly asked
-- `/srv/website/bitweaver5` — retired 2026-08-11, orphaned, edit in `~/Development/bitweaver-lsces` instead
+- `bitweaver5` — retired 2026-08-11, moved to `/srv/archive/bitweaver5`; edit in `~/Development/bitweaver-lsces` instead
 - `/etc/nginx`, `/etc/php*` — not the source of truth, see /srv/webstack
 
 ## Patterns & Conventions
