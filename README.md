@@ -1,4 +1,4 @@
-# bitweaver-lsces
+# bitweaver
 
 A personal fork of [bitweaver](http://www.bitweaver.org/) — a PHP CMS and application framework
 originally derived from TikiWiki. This organisation holds one repository per package. All packages
@@ -219,7 +219,7 @@ of PHP's own session mechanism even though they share the same cookie name.
 ## Deploy Path
 
 Code is developed and tested live in `/srv/website/bitweaver5/` (with xdebug available).
-Proven changes are copied to the matching package repo under `~/Development/bitweaver-lsces/<pkg>/`,
+Proven changes are copied to the matching package repo under `~/Development/bitweaver/<pkg>/`,
 reviewed with BeyondCompare, then committed and pushed.
 
 Servers (`srv9`, `srv10`) pull from the desktop's local git repos — **not** from GitHub.

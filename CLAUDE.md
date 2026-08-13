@@ -2,18 +2,23 @@
 
 ## Stack
 - PHP 8.5.7 / Firebird 5 / adodb / Smarty
-- One repo per package (bitweaver-lsces organisation)
+- One repo per package (`lsces` GitHub organisation)
 - webtrees used as an additional package with illuminate-firebird providing Firebird DB driver (personal fork)
 - externals/ holds actively-developed third-party dependencies
 - No npm, no Node.js — ever
 
 ## Deploy Path
+**Updated 2026-08-13 — directory renamed `bitweaver-lsces` → `bitweaver`**, matching the GitHub
+repo name (`lsces/bitweaver.git`) — `bitweaver-lsces` was only ever a local placeholder name, used
+in documentation, not something anything functional depended on. `/srv/website/_bw5` repointed to
+match; see the dated log entry below for what else got fixed along the way.
+
 **Updated 2026-08-11 — `bitweaver5` retired as the edit copy.** `/srv/website/_bw5` now symlinks
-straight to `~/Development/bitweaver-lsces` — code is edited and tested directly there (xdebug
+straight to `~/Development/bitweaver` — code is edited and tested directly there (xdebug
 still available), no more copy-then-commit step. `/srv/website/bitweaver5` itself has since been
 moved to `/srv/archive/bitweaver5` — it no longer exists at its old path, nothing points at it.
 
-Each bitweaver package is a self-contained directory under `~/Development/bitweaver-lsces/`, with
+Each bitweaver package is a self-contained directory under `~/Development/bitweaver/`, with
 its own **individual git repo**. That top-level directory is **itself** also a git repo (own
 `.git`, pushes to `github.com:lsces/bitweaver.git`) — separate from every per-package repo living
 inside it as a subdirectory. This top-level `CLAUDE.md` (and anything else cross-package/org-level,
@@ -23,7 +28,7 @@ nginx-serving, unrelated, not yet wired up) or with `/etc/webstack`'s own separa
 config, different bare repo entirely).
 
 Deploy steps:
-1. Edit directly in `~/Development/bitweaver-lsces/<package>/`
+1. Edit directly in `~/Development/bitweaver/<package>/`
 2. Commit in that package's git repo
 3. `git push` — updates GitHub (publish-only, not part of the deploy chain)
 4. `/etc/webstack/scripts/server-pull-all.sh <package>` — pulls to srv9 and srv10 from the desktop's local copy (run via `ssh root@srv9`/`srv10`, not directly from desktop)
@@ -44,7 +49,7 @@ Do not roam into other packages unless explicitly asked.
 - `webtrees/` — separate application, has its own work thread
 - `vendor/` — composer-managed, do not touch
 - `externals/` — third-party libs, treat as read-only unless explicitly asked
-- `bitweaver5` — retired 2026-08-11, moved to `/srv/archive/bitweaver5`; edit in `~/Development/bitweaver-lsces` instead
+- `bitweaver5` — retired 2026-08-11, moved to `/srv/archive/bitweaver5`; edit in `~/Development/bitweaver` instead
 - `/etc/nginx`, `/etc/php*` — not the source of truth, see /srv/webstack
 
 ## Patterns & Conventions
@@ -360,4 +365,14 @@ following a `/clear` or a machine restart/reboot.
 - **2026-08-13** — CLAUDE.md reorg: generic/cross-cutting content (philosophy, server topology,
   machine access, sanity check, CC limitations note) moved to a new `/srv/website/CLAUDE.md` — this
   file trimmed to Bitweaver-project-specific content only. Read `/srv/website/CLAUDE.md` first when
-  starting a fresh session; this file is now purely "how Bitweaver code itself works."
+  starting a fresh session; this file is now purely "how Bitweaver code itself works." **Same day,
+  second thread** — directory renamed `~/Development/bitweaver-lsces` → `~/Development/bitweaver`,
+  matching the GitHub repo name (`lsces/bitweaver.git`); the `-lsces` suffix was only ever a local
+  placeholder used in documentation, nothing functional depended on the literal name. `mv`'d, then
+  `/srv/website/_bw5` repointed to the new path (the only symlink pointing directly at it — every
+  site's package symlinks go via `_bw5` relatively, so nothing else needed touching); verified
+  live with a smoke-test request before moving on. Also fixed: `/etc/webstack/scripts/
+  package-tag.sh`'s hardcoded path, and every doc reference across this file,
+  `/srv/website/CLAUDE.md`, `/etc/webstack/CLAUDE.md`, and this repo's `README.md` (dated log
+  entries describing the pre-rename state left as `bitweaver-lsces`, since that was the real name
+  at the time).
