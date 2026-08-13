@@ -7,12 +7,6 @@
 - externals/ holds actively-developed third-party dependencies
 - No npm, no Node.js — ever
 
-## Philosophy
-- Fix root causes, not symptoms
-- Self-hosted, document everything
-- Internal stays internal
-- Clean diffs matter more than PSR compliance for its own sake
-
 ## Deploy Path
 **Updated 2026-08-11 — `bitweaver5` retired as the edit copy.** `/srv/website/_bw5` now symlinks
 straight to `~/Development/bitweaver-lsces` — code is edited and tested directly there (xdebug
@@ -25,8 +19,8 @@ its own **individual git repo**. That top-level directory is **itself** also a g
 inside it as a subdirectory. This top-level `CLAUDE.md` (and anything else cross-package/org-level,
 not belonging to one specific package) lives there directly now — edit it in place, commit+push in
 that repo, same as any package. Don't confuse this with `/srv/git/bitweaver` (a bare repo for
-nginx-serving, unrelated, not yet wired up — see the NOTE below) or with `/etc/webstack`'s own
-separate repo (server config, different bare repo entirely).
+nginx-serving, unrelated, not yet wired up) or with `/etc/webstack`'s own separate repo (server
+config, different bare repo entirely).
 
 Deploy steps:
 1. Edit directly in `~/Development/bitweaver-lsces/<package>/`
@@ -34,23 +28,13 @@ Deploy steps:
 3. `git push` — updates GitHub (publish-only, not part of the deploy chain)
 4. `/etc/webstack/scripts/server-pull-all.sh <package>` — pulls to srv9 and srv10 from the desktop's local copy (run via `ssh root@srv9`/`srv10`, not directly from desktop)
 
-Servers do NOT pull from GitHub — they pull from the desktop's local copy.
-After pulling on a server, clear the Smarty template cache and restart php-fpm.
+Servers do NOT pull from GitHub — they pull from the desktop's local copy. After pulling on a
+server, clear the Smarty template cache and restart php-fpm.
 
-Server configuration (nginx, PHP, Firebird) lives in `/etc/webstack/` — a separate
-git repo replicated across desktop, srv9, and srv10. Never look in `/etc/nginx` or
-`/etc/php*` — they are not the source of truth.
-`/etc/webstack` pushes to the bare repo at `/srv/git/webstack.git` (not GitHub) — always
-`git push` there before pulling on servers, otherwise servers see stale state.
-
-> NOTE: `/srv/git/bitweaver` → nginx is not yet wired up (infrastructure thread — do not action).
-
-Test all changes on srv9 first (including `zypper dup` before system updates).
-srv10 is production — only gets changes proven on srv9.
-
-`ssh root@srv9` / `ssh root@srv10` work directly from the desktop (key-based, no password) —
-use this for anything needing live server state: nginx/fail2ban config verification, log
-inspection, service reload/restart, etc. No sudo needed once connected.
+**Server topology, general deploy/ops philosophy, machine access, and the session-start sanity
+check now live one level up in `/srv/website/CLAUDE.md`** — read that first when starting a fresh
+session. Server configuration detail (nginx, PHP, Firebird, fail2ban, logging) is in
+`/etc/webstack/CLAUDE.md`, linked again from "Infrastructure" below.
 
 ## Scope
 Focus exclusively on Bitweaver code in the current working package.
@@ -220,36 +204,9 @@ one-liners 2026-08-10 (was 3 dated entries deep per topic); nothing here was los
 of this file for the fuller prose if ever needed.
 
 ### Sanity check
-Run this at the start of every new session that follows a `/clear` or a machine restart/reboot —
-cheap, all read-only, catches silent failures (overnight or otherwise) before they compound into
-something worse:
-1. Reachability — desktop/srv9/srv10 all up (`ssh root@srv9`/`srv10`, check `uptime`)
-2. Firebird backups fresh — `srv10-backup` (9 domains) and `srv9-backup` (`rdmcloud`, reverse
-   direction, srv9→srv10) ran overnight; check timestamps under a domain's `storage/backup/`
-3. `firebird-restore` clean — no stray `.fdb.old` sitting next to a live `.fdb`. FlameRobin being
-   open on desktop is NOT itself a problem to flag — `srv9-backup` unconditionally `pkill -9 -x
-   flamerobin`s before its nightly restore call regardless of which domain's DB it has open (the
-   block is a per-file lock, not process-wide; must be `-9` — plain SIGTERM is caught/ignored, same
-   as its own Quit/End Application not working, fixed 2026-08-11), so an open session never
-   survives to interfere.
-   See `project_firebird_dr_topology` memory for the safe-swap mechanics.
-4. `status.php` on all three — disk/SMART/temps all GREEN:
-   - srv10: `https://rdm1.uk/status.php`
-   - srv9: `https://rdm1.uk:8443/status.php`
-   - desktop: any local-\* vhost domain except a `.uk` one, e.g. `https://rdmcloud/status.php`
-     (see `reference_status_php` memory — the HTTP-only `rdm1` vhost is NOT the way in)
-5. Cert validity — `openssl x509 -enddate -noout -in /etc/webstack/nginx/ssl/<domain>/fullchain.cer.ecc`
-   (real files are `.cer.ecc`, not `.crt`) for a couple of domains (e.g. `rdm1.uk`, `rdmcloud.uk`)
-   on srv10, srv9, and desktop — confirm `notAfter` is current and identical across all three
-   (acme.sh only renews on srv10 at 11:43am, syncing out to srv9+desktop after — see
-   `reference_cert_sync_topology` memory; a stale/expired copy on one machine has happened before
-   and won't show up in any of the other checks here)
-6. fail2ban — jails active, no unexpected ban spree overnight
-7. nginx/php-fpm active on both servers
-8. Spot-check one live page on srv9 (`:8443`) and srv10
-
-If any check comes back off, investigate before moving on to whatever the session was actually
-opened for.
+Moved to `/srv/website/CLAUDE.md` (2026-08-13) — applies to the whole server stack, not just
+Bitweaver work, so it now lives one level up. Run it there at the start of any new session
+following a `/clear` or a machine restart/reboot.
 
 - **2026-08-11** — Morning sanity check all green (backups, certs, fail2ban, services, status.php).
   Found the 2026-08-10 FlameRobin fix was itself broken: `pkill -x flamerobin` (SIGTERM) reports
@@ -400,8 +357,7 @@ opened for.
 - **2026-06-17 to 06-23** — Theme/asset cleanup + site structure rationalisation (generic config
   symlinked from `_bw5/config/`); per-site JS loader pattern for banner/footer scripts. Detail
   `themes/CLAUDE.md`.
-
-## CC Limitations
-For execution-order bugs and session/config state problems, 
-use xdebug rather than asking CC to trace — static analysis 
-cannot follow runtime state reliably.
+- **2026-08-13** — CLAUDE.md reorg: generic/cross-cutting content (philosophy, server topology,
+  machine access, sanity check, CC limitations note) moved to a new `/srv/website/CLAUDE.md` — this
+  file trimmed to Bitweaver-project-specific content only. Read `/srv/website/CLAUDE.md` first when
+  starting a fresh session; this file is now purely "how Bitweaver code itself works."
