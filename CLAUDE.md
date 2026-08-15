@@ -418,3 +418,16 @@ following a `/clear` or a machine restart/reboot.
   `/srv/website/CLAUDE.md`, `/etc/webstack/CLAUDE.md`, and this repo's `README.md` (dated log
   entries describing the pre-rename state left as `bitweaver-lsces`, since that was the real name
   at the time).
+- **2026-08-15** — New `food` package scaffolded (skeleton only — `bit_setup_inc.php`, empty
+  `schema_inc.php`, own repo at `github.com/lsces/food`, symlinked into rdmcloud); architecture
+  plan (FoodComponent/FoodAssembly/FoodMovement mirroring `stock`, nutrition xref design, Samsung
+  Health import strategy) written into `food/CLAUDE.md`. New "Creating a New Package" section
+  added above documenting the general process. **Second thread, same day** — rdmcloud theme
+  tidy: `bot_bar.tpl` (RDM-branding footer) turned out to be hand-duplicated near-identically
+  across 11 sites with real drift (http vs https, `.co.uk` vs `.uk`); consolidated into one shared
+  file via a new `force` theme tier (`themes/CLAUDE.md`), all 11 copies removed. rdmcloud's dead
+  `footer_inc.tpl` (innerfade script with nothing left to target after the banner was trimmed)
+  also removed. Found+fixed along the way: 3 vhosts (`medw`/`timedb`/`phpsurgery`) had their own
+  `location`-level crawler-IP bans that silently shadowed srv9's lockdown allowlist (detail in
+  `/etc/webstack/CLAUDE.md`); a stale "Smarty never needs a manual cache clear" claim was also
+  corrected — that only holds for same-path edits, not template-resolution changes like this one.
