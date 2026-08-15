@@ -41,6 +41,45 @@ check now live one level up in `/srv/website/CLAUDE.md`** — read that first wh
 session. Server configuration detail (nginx, PHP, Firebird, fail2ban, logging) is in
 `/etc/webstack/CLAUDE.md`, linked again from "Infrastructure" below.
 
+## Creating a New Package
+
+Worked example: the `food` package, scaffolded 2026-08-15 (see `food/CLAUDE.md` for its own
+plan). This is the **how** — mechanical steps to get a new package existing and installable;
+for **why** the registration mechanism works the way it does (what `registerPackage()` actually
+does, the VS Code `define()` bodge, dual-guid xref scoping, etc.), see `liberty/CLAUDE.md`'s
+"Package registration" section.
+
+1. `mkdir -p <pkg>/includes/classes <pkg>/admin/upgrades <pkg>/templates` under
+   `~/Development/bitweaver/`.
+2. Write `<pkg>/includes/bit_setup_inc.php` — copy `stock/includes/bit_setup_inc.php`'s shape,
+   swap the package name and the six `<PKG>_PKG_*` constant names/defines. This is the file that
+   makes bitweaver recognize the directory as a package at all — nothing else works until it
+   exists.
+3. Write `<pkg>/admin/schema_inc.php` — can start with an **empty** `$tables` array (nothing to
+   register yet); still needs `registerPackageInfo()` (description/license) and
+   `registerPreferences()` with at least `<pkg>_menu_text`.
+4. Write `<pkg>/templates/menu_<pkg>.tpl` — the top-bar dropdown template referenced by
+   `bit_setup_inc.php`'s `registerAppMenu()` call; a single link to `index.php` is enough until
+   real pages exist.
+5. Write a minimal `<pkg>/index.php` placeholder (`require_once '../kernel/includes/setup_inc.php';
+   $gBitSystem->verifyPackage('<pkg>');` + a stub message) so nothing fatals if visited early.
+6. `git init -b master`, initial commit, in the new package directory itself.
+7. `gh repo create lsces/<pkg> --private --description "..." --source=. --remote=origin --push`
+   — every package repo lives under the `lsces` GitHub account/org (not the `lsces` *site*, which
+   is a separate, legacy thing — don't confuse the two), same as `liberty`/`stock`/etc., and is
+   `--private` by convention.
+8. Add `/<pkg>/` to the **top-level** `~/Development/bitweaver/.gitignore` (alphabetical, matches
+   every other package's entry) — the wrapper repo must not try to track the nested package repo.
+   Commit + push in the wrapper repo itself.
+9. Symlink the package into whichever site(s) actually need it:
+   `sudo ln -s ../_bw5/<pkg> /srv/website/<domain>/<pkg>` — same relative-symlink pattern as every
+   other package in that site directory (`ls -la /srv/website/<domain>/` to see the existing
+   pattern before assuming). Requires `sudo` (site dirs are `root:root`) — desktop sudo is
+   passwordless, don't punt this back to the user.
+10. Not yet installed — that's a separate step via the site's own Packages admin page, once
+    there's real schema to install. A freshly-scaffolded package existing and being symlinked in
+    is not the same as it being active.
+
 ## Scope
 Focus exclusively on Bitweaver code in the current working package.
 Do not roam into other packages unless explicitly asked.
@@ -193,6 +232,9 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
 - `protector/CLAUDE.md` — permission-check-unreachable bug (fixed 2026-08-02): anonymous/
   unauthorized access to protector-restricted content fell through to a generic "page not
   found" instead of the login/permission-denied prompt
+- `food/CLAUDE.md` — new package (skeleton only, 2026-08-15), modeled on `stock`: architecture
+  plan (FoodComponent/FoodAssembly/FoodMovement), nutrition xref design, Samsung Health import
+  strategy
 
 ## Infrastructure
 Detail lives in `/etc/webstack/CLAUDE.md` — its own repo, own `CLAUDE.md`, same pattern as the
