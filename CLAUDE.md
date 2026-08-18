@@ -235,10 +235,11 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
 - `food/CLAUDE.md` — new package (skeleton only, 2026-08-15), modeled on `stock`: architecture
   plan (FoodComponent/FoodAssembly/FoodMovement), nutrition xref design, Samsung Health import
   strategy
-- `health/CLAUDE.md` — companion package to `food`, same Samsung Health export; `health/MANUAL.md`
-  — architecture sketch only (2026-08-18, not scaffolded): `jsons/` detail-tier shape taxonomy
-  (flat object vs array-of-objects/time-series vs nested/irregular vs PDF), proposed
-  HealthMetric/HealthSession content model, CSV-tier-first v1 scope
+- `health/CLAUDE.md` — companion package to `food`, same Samsung Health export, skeleton
+  scaffolded 2026-08-18 (own repo, symlinked into rdmcloud, no schema yet); `health/MANUAL.md` —
+  architecture sketch: `jsons/` detail-tier shape taxonomy (flat object vs array-of-objects/
+  time-series vs nested/irregular vs PDF), proposed HealthMetric/HealthSession content model,
+  CSV-tier-first v1 scope
 
 ## Infrastructure
 Detail lives in `/etc/webstack/CLAUDE.md` — its own repo, own `CLAUDE.md`, same pattern as the
@@ -435,3 +436,16 @@ following a `/clear` or a machine restart/reboot.
   `location`-level crawler-IP bans that silently shadowed srv9's lockdown allowlist (detail in
   `/etc/webstack/CLAUDE.md`); a stale "Smarty never needs a manual cache clear" claim was also
   corrected — that only holds for same-path edits, not template-resolution changes like this one.
+- **2026-08-18** — New `health` package scaffolded (skeleton only — `bit_setup_inc.php`, empty
+  `schema_inc.php`, own repo at `github.com/lsces/health`, symlinked into rdmcloud), same pattern
+  as `food`'s 2026-08-15 scaffold, its initial-commit files copied and adapted directly.
+  Architecture sketch (Samsung Health `jsons/` shape taxonomy, proposed HealthMetric/HealthSession
+  content model) already written into `health/CLAUDE.md`/`MANUAL.md` earlier the same day.
+  **Same session, liberty-level work**: added a `multiple < 0` convention to
+  `liberty_xref_item` — `-1` = read-only (enforced in `add_xref.php`'s item picker,
+  `LibertyXref::verify()`, `edit_xref.php`), `-2` = mutually exclusive within the same `x_group`
+  (`LibertyXref::store()` evicts sibling `-2` items on a successful store). The `-2` mechanism
+  closed a real, previously-open Food gap (`SGL`/`WT`/`VOL` unit-type items could coexist when
+  they shouldn't) — applied to `food/admin/schema_inc.php` and hand-pushed to desktop's rdmcloud
+  DB same day, live-verified against two real pre-existing conflicts. Full detail in
+  `liberty/MANUAL.md`'s Data model section and the `project_liberty_xref_flags` memory.
