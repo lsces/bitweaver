@@ -235,6 +235,10 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
 - `food/CLAUDE.md` — new package (skeleton only, 2026-08-15), modeled on `stock`: architecture
   plan (FoodComponent/FoodAssembly/FoodMovement), nutrition xref design, Samsung Health import
   strategy
+- `health/CLAUDE.md` — companion package to `food`, same Samsung Health export; `health/MANUAL.md`
+  — architecture sketch only (2026-08-18, not scaffolded): `jsons/` detail-tier shape taxonomy
+  (flat object vs array-of-objects/time-series vs nested/irregular vs PDF), proposed
+  HealthMetric/HealthSession content model, CSV-tier-first v1 scope
 
 ## Infrastructure
 Detail lives in `/etc/webstack/CLAUDE.md` — its own repo, own `CLAUDE.md`, same pattern as the
