@@ -449,3 +449,34 @@ following a `/clear` or a machine restart/reboot.
   they shouldn't) — applied to `food/admin/schema_inc.php` and hand-pushed to desktop's rdmcloud
   DB same day, live-verified against two real pre-existing conflicts. Full detail in
   `liberty/MANUAL.md`'s Data model section and the `project_liberty_xref_flags` memory.
+- **2026-08-19** — Full-day live install-flow testing session: rebuilt rdmcloud from scratch via
+  `install/install.php`, deliberately exercising install/reinstall/uninstall paths nobody had hit
+  in years. Found and fixed a long chain of genuinely dormant bugs, most centred on `contact`
+  (first real package tested through a fatal-mid-cycle scenario): the installer's tables/indexes
+  step used a second, independent DB connection from every later step, so a fatal partway through
+  couldn't roll back DDL an earlier step had already committed — fixed by sharing one connection
+  and wrapping the whole cycle in one real outer transaction, plus extending the existing
+  transaction-shutdown safety net (built for the wiki bug, see `liberty/MANUAL.md`) to cover the
+  installer, since `$gBitDb` isn't set during install. `contact`'s own schema had accumulated
+  several bugs on top: duplicate `liberty_content_types` registration (already handled properly by
+  `registerContentType()`, `contact`'s raw `defaults` INSERT fought it), no `registerContentObjects()`
+  call at all (silently broke the installer's own uninstall cleanup for every other package that
+  does have it), and three now-superseded "development upgrade" files migrating tables that never
+  existed outside one legacy production site — deleted. Full blow-by-blow in `contact/CLAUDE.md`.
+  **Mapper**: `test_rlp.map`'s bundled demo mapfile finally got a working live pump into a real Map
+  object (content_id 16), surfacing several more `fixRelativePaths()` gaps (unquoted `DATA`,
+  relative/cross-site `IMAGEPATH`/`SHAPEPATH`, missing WMS `wms_enable_request` metadata) — the old
+  `mapsets_inc.php` registry's `'test'` stopgap entry retired in favour of the real Map object
+  (renamed to title `'test'` to match, so no other code needed changing). Full detail
+  `mapper/CLAUDE.md`. **Food**: both Samsung Health CSV importers (`food_info`/`food_intake`) run
+  clean against a real full export for the first time (needed a `max_execution_time` override,
+  same reasoning as install's), 10 real UK-supermarket `contactbusiness` records imported for
+  `foodMatchSupplier()` to match against; `food` package cloned onto srv9/srv10 for the first time
+  (existed on desktop only before today). **Cross-site cleanup**: `storage/common` (a stale
+  default-avatar scaffold, one real site's own portrait baked in as a "default" and copied
+  identically to several others) and a leftover `storage/admin/schema_inc.php` (superseded by an
+  earlier package-level fix that only touched the symlinked package source, never each site's own
+  real `storage/` copy) both removed from every affected site, all three machines. rdmcloud's full
+  Firebird DB pushed desktop→srv9/srv10 for the first time this session (normally the reverse
+  direction) once testing stabilised. Detail split across `contact/CLAUDE.md`, `mapper/CLAUDE.md`,
+  `food/CLAUDE.md`, and `/etc/webstack/CLAUDE.md` (fastcgi timeout, storage cleanup specifics).
