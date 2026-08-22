@@ -170,29 +170,12 @@ stock and contact packages
 
 ## Bitweaver Structure Notes
 
-### Permission / Role system
-Default role_id values (ANONYMOUS_TEAM_ID = -1):
-- `1` Administrators — perm_level `admin`
-- `2` Editors — perm_level `editors`
-- `3` Registered — perm_level `registered`
-- `-1` Anonymous — perm_level `basic`
-
-Permissions assigned in `*/admin/schema_inc.php`. Role assignments stored in
-`users_role_permissions`. When writing xref role-filter queries, guard `mRoles`
-with `array_keys($gBitUser->mRoles ?? []) ?: [-1]` — Firebird rejects empty `IN()`.
-
-### Session / Auth cookie
-Cookie name = `bit-user-{site_title_stripped}` (lowercase, alphanum only) — compute from
-`kernel_config.site_title` (strip non-alnum, lowercase).
-Login stores PHP `session_id()` in `users_cnxn.cookie` mapped to `user_id`.
-Subsequent requests look up the cookie value in `users_cnxn` to identify the user —
-this is separate from PHP's own session mechanism (though they share the same cookie name).
-
-**Testing authenticated flows without a password**: `INSERT INTO users_cnxn (user_id, cookie,
-ip, last_get, connect_time, get_count) VALUES (<user_id>, '<random hex>', '127.0.0.1', <epoch>,
-<epoch>, 1)`, then send that same value as the `bit-user-{site}` cookie in curl. Confirmed
-working 2026-07-31 (smoke-testing a wiki save fix end-to-end). Clean up the row afterward
-(`DELETE FROM users_cnxn WHERE cookie = '...'`) — it's not session-expiring on its own.
+### Permission / Role system, Session / Auth cookie
+Moved to `users/CLAUDE.md` (2026-08-22) — role_id defaults, `users_role_permissions`, cookie
+naming/lookup mechanics, and the `users_cnxn` faked-session testing trick all live there now,
+alongside the role-model rationalisation history and two real 2026-08-20 bugs (`loadRoles()`,
+post-login redirect). The lookup-table quick reference below (DB alias/cookie-name-per-domain
+conventions) stays here since it's cross-site, not users-package-specific.
 
 **Don't dig for these — they're predictable, simple expansions of each domain's short name**
 (the same short form used as the Firebird DB alias, e.g. `lsces` for `lsces.uk`, `medw`, `merg`):
@@ -217,6 +200,11 @@ system, site-specific theme overrides.
 
 ### Package-specific notes
 Detail for individual packages lives in their own `CLAUDE.md` files:
+- `kernel/CLAUDE.md` — transaction shutdown safety net (`bit_shutdown_handler()`, `transOff` vs
+  `transCnt`), APCu object cache `__destruct()` bug, `BitDate` global-timezone-mutation fix
+- `users/CLAUDE.md` — RolePermUser-only rationalisation history (group model deleted), role/
+  permission reference, session/cookie mechanics, two 2026-08-20 bugs (`loadRoles()`, post-login
+  redirect)
 - `themes/CLAUDE.md` — navbar menu, CSS load order, Smarty notes, module/layout, site overrides
 - `liberty/CLAUDE.md` — xref machinery (LibertyXrefType, dual-guid schema, display path,
   parseDataHash, storeXref, owner change, Firebird GROUP BY)
@@ -224,7 +212,12 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
   load() cleanup, delete/expunge
 - `stock/CLAUDE.md` — file naming, movement model (REQN/PBLD/TRANS/ORDER), template
   structure, multi-user kitelf filtering, getList() enriched fields
-- `wiki/CLAUDE.md` — BitPage::store() missing RollbackTrans bug (intermittent "page not found")
+- `wiki/CLAUDE.md` — BitPage::store() missing RollbackTrans bug (intermittent "page not found") —
+  **fixed generically 2026-08-11**, not by patching `store()` itself: `kernel/CLAUDE.md`'s
+  transaction shutdown safety net now rolls back any orphaned transaction on request end,
+  covering this case along with everything else `StartTrans()`/`CompleteTrans()` without a
+  `RollbackTrans()` fallback; `wiki/CLAUDE.md`'s own text still describes it as open, stale as of
+  this note
 - `mapper/CLAUDE.md` — session log (decisions, bugs found, open follow-ups); `mapper/MANUAL.md` —
   current-state reference (architecture, Map content object/xref schema, tile caching, pretty
   URLs, permissions, deployment topology incl. `rdmcloud.uk`) — read MANUAL.md first for "how
@@ -480,18 +473,8 @@ following a `/clear` or a machine restart/reboot.
   Firebird DB pushed desktop→srv9/srv10 for the first time this session (normally the reverse
   direction) once testing stabilised. Detail split across `contact/CLAUDE.md`, `mapper/CLAUDE.md`,
   `food/CLAUDE.md`, and `/etc/webstack/CLAUDE.md` (fastcgi timeout, storage cleanup specifics).
-- **2026-08-22** — Real kernel bug found and fixed while chasing a Food timezone report ("today's
-  breakfast has migrated an hour"): `BitDate`'s display-conversion methods
-  (`getDisplayDateFromUTC()`/`getUTCFromDisplayDate()`) called `date_default_timezone_set()` with
-  no restore, mutating PHP's *global* ambient timezone for the rest of the request — any later bare
-  `strtotime()`/`date()`/`mktime()` call anywhere, in any package, silently re-interpreted its input
-  against the wrong zone. Not Food-specific despite how it surfaced; fixed at the source
-  (`kernel` commit `3a71379`) by passing a `DateTimeZone` directly into `DateTime`'s constructor
-  instead of touching global state at all. `gmmktime()` (immune to this class of bug by
-  construction) is now the house convention for any callsite doing day-boundary arithmetic
-  alongside a `BitDate` call in the same request — see `food/MANUAL.md`'s "Time storage" section
-  for a worked example. Deployed to desktop + srv9; kernel has no `git push`-then-`server-pull-
-  all.sh` cadence tracked separately from whichever package's session pulled it in, so srv10 gets
-  it next time any package deploy touches srv10 (not yet, as of this entry). No `kernel/CLAUDE.md`
-  exists — kernel-level fixes land here instead; see `project_food_bst_timestamp_fix` and
-  `reference_firebird_clock_and_bitweaver_tz` memories for the full investigation.
+- **2026-08-22** — Real kernel bug found and fixed while chasing a Food timezone report:
+  `BitDate` was mutating PHP's global ambient timezone with no restore, silently corrupting any
+  later bare `strtotime()`/`date()`/`mktime()` call in the same request, any package. Fixed at the
+  source (`kernel` `3a71379`); srv10 still pending. `kernel/CLAUDE.md` created the same day — full
+  detail moved there, not duplicated here.
