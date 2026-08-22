@@ -205,19 +205,20 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
 - `users/CLAUDE.md` — RolePermUser-only rationalisation history (group model deleted), role/
   permission reference, session/cookie mechanics, two 2026-08-20 bugs (`loadRoles()`, post-login
   redirect)
-- `themes/CLAUDE.md` — navbar menu, CSS load order, Smarty notes, module/layout, site overrides
+- `themes/CLAUDE.md` — navbar menu, CSS load order, Smarty notes, module/layout, site overrides;
+  `themes/MANUAL.md` — same topics as current-state reference (split 2026-08-22)
 - `liberty/CLAUDE.md` — xref machinery (LibertyXrefType, dual-guid schema, display path,
-  parseDataHash, storeXref, owner change, Firebird GROUP BY)
-- `contact/CLAUDE.md` — person/business model, ContactPerson/ContactBusiness plan, SCREF,
-  load() cleanup, delete/expunge
-- `stock/CLAUDE.md` — file naming, movement model (REQN/PBLD/TRANS/ORDER), template
-  structure, multi-user kitelf filtering, getList() enriched fields
-- `wiki/CLAUDE.md` — BitPage::store() missing RollbackTrans bug (intermittent "page not found") —
-  **fixed generically 2026-08-11**, not by patching `store()` itself: `kernel/CLAUDE.md`'s
-  transaction shutdown safety net now rolls back any orphaned transaction on request end,
-  covering this case along with everything else `StartTrans()`/`CompleteTrans()` without a
-  `RollbackTrans()` fallback; `wiki/CLAUDE.md`'s own text still describes it as open, stale as of
-  this note
+  parseDataHash, storeXref, owner change, Firebird GROUP BY); `liberty/MANUAL.md` — current
+  xref-system reference
+- `contact/CLAUDE.md` — person/business model, ContactPerson/ContactBusiness history, install
+  saga; `contact/MANUAL.md` — current schema/mechanisms reference (split 2026-08-22)
+- `stock/CLAUDE.md` — movement-model history, Firebird gotchas found, `stock_assembly_map`
+  dead-table investigation; `stock/MANUAL.md` — current schema/mechanisms reference, kitlocker
+  sync tooling (split 2026-08-22)
+- `wiki/CLAUDE.md` — `BitPage::store()` missing-`RollbackTrans` bug, found 2026-06-18, fixed
+  2026-07-31 (both directly in `store()` and generically via `kernel/CLAUDE.md`'s transaction
+  shutdown safety net); `wiki/MANUAL.md` — current transaction-safety mechanism + stuck-
+  transaction diagnostic (split 2026-08-22)
 - `mapper/CLAUDE.md` — session log (decisions, bugs found, open follow-ups); `mapper/MANUAL.md` —
   current-state reference (architecture, Map content object/xref schema, tile caching, pretty
   URLs, permissions, deployment topology incl. `rdmcloud.uk`) — read MANUAL.md first for "how
