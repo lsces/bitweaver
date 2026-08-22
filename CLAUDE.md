@@ -480,3 +480,18 @@ following a `/clear` or a machine restart/reboot.
   Firebird DB pushed desktop→srv9/srv10 for the first time this session (normally the reverse
   direction) once testing stabilised. Detail split across `contact/CLAUDE.md`, `mapper/CLAUDE.md`,
   `food/CLAUDE.md`, and `/etc/webstack/CLAUDE.md` (fastcgi timeout, storage cleanup specifics).
+- **2026-08-22** — Real kernel bug found and fixed while chasing a Food timezone report ("today's
+  breakfast has migrated an hour"): `BitDate`'s display-conversion methods
+  (`getDisplayDateFromUTC()`/`getUTCFromDisplayDate()`) called `date_default_timezone_set()` with
+  no restore, mutating PHP's *global* ambient timezone for the rest of the request — any later bare
+  `strtotime()`/`date()`/`mktime()` call anywhere, in any package, silently re-interpreted its input
+  against the wrong zone. Not Food-specific despite how it surfaced; fixed at the source
+  (`kernel` commit `3a71379`) by passing a `DateTimeZone` directly into `DateTime`'s constructor
+  instead of touching global state at all. `gmmktime()` (immune to this class of bug by
+  construction) is now the house convention for any callsite doing day-boundary arithmetic
+  alongside a `BitDate` call in the same request — see `food/MANUAL.md`'s "Time storage" section
+  for a worked example. Deployed to desktop + srv9; kernel has no `git push`-then-`server-pull-
+  all.sh` cadence tracked separately from whichever package's session pulled it in, so srv10 gets
+  it next time any package deploy touches srv10 (not yet, as of this entry). No `kernel/CLAUDE.md`
+  exists — kernel-level fixes land here instead; see `project_food_bst_timestamp_fix` and
+  `reference_firebird_clock_and_bitweaver_tz` memories for the full investigation.
