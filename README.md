@@ -1,8 +1,9 @@
 # bitweaver
 
 A personal fork of [bitweaver](http://www.bitweaver.org/) — a PHP CMS and application framework
-originally derived from TikiWiki. This organisation holds one repository per package. All packages
-are deployed together under a single web root (`bitweaver5/`).
+originally derived from TikiWiki. This organisation holds one repository per package, plus this
+wrapper repo tying them together. A real site symlinks each package it needs from a checkout of
+this wrapper into its own web root — all packages share one codebase, deployed together.
 
 Having used bitweaver for many years across several live sites, this fork has been carried forward
 into a modern stack: PHP 8.5, Firebird 5, Smarty 5 with namespaces, and adodb on a custom branch.
@@ -14,7 +15,7 @@ It is published here in the hope that parts of it are useful to others.
 
 | Layer | Technology |
 |---|---|
-| Language | PHP 8.6 |
+| Language | PHP 8.5 |
 | Database | Firebird 5 via adodb (`v5.22.11-lsc` branch) |
 | Templates | Smarty 5 |
 | CSS/JS | Bootstrap 3, jQuery — no npm, no Node.js |
@@ -218,16 +219,15 @@ of PHP's own session mechanism even though they share the same cookie name.
 
 ## Deploy Path
 
-Code is developed and tested live in `/srv/website/bitweaver5/` (with xdebug available).
-Proven changes are copied to the matching package repo under `~/Development/bitweaver/<pkg>/`,
-reviewed with BeyondCompare, then committed and pushed.
+Each package is a self-contained directory under this wrapper repo (own git repo, own GitHub
+remote) — developed directly in place, no separate build or copy step. Edit under `<package>/`,
+commit in that package's own repo, `git push`.
 
-Servers (`srv9`, `srv10`) pull from the desktop's local git repos — **not** from GitHub.
-The deploy script is `/etc/webstack/scripts/server-pull-all.sh <package>`.
-
-Test on **srv9** first. `srv10` is production and only receives changes proven on srv9.
-
-After any deploy that touches Smarty templates: clear the template cache and restart php-fpm.
+Getting changes onto a live server (pulling, clearing Smarty's template cache, restarting
+php-fpm) is your own infrastructure's job — nothing here prescribes a specific server setup. If
+you run staging and production instances, the general-purpose advice is the obvious one: prove
+structural changes on staging before production, small already-verified fixes can go straight to
+both.
 
 ---
 
@@ -241,11 +241,27 @@ After any deploy that touches Smarty templates: clear the template cache and res
 | themes | — | Layout, CSS loading, module system |
 | languages | — | Translations, `tra()` string lookup |
 | config | — | Site-level overrides (CSS, templates) |
-| contact | `contact` | Person and business contacts, CSV import |
+| util | — | Shared JavaScript, icons, cross-package utilities |
+| storage | — | Shared attachment/icon storage support |
+| install | — | Installer / upgrader |
+| protector | — | Row-level content permission enforcement, hooks into liberty |
+| contact | `contact`, `contactperson`, `contactbusiness` | Person and business contacts, CSV import |
 | stock | `stockassembly`, `stockcomponent`, `stockmovement` | BOM, stock levels, movement CSV import |
+| food | `foodcomponent`, `foodassembly`, `foodmovement` | Nutrition/pantry tracking, Samsung Health CSV import |
+| health | `healthday` | Samsung Health / HealthForYou vitals import (weight, BP, pulse, SpO2, temperature, sleep, steps) |
+| mapper | `map` | MapServer-based GIS viewer, on-demand tile caching |
 | articles | `article` | — |
 | blogs | `blog`, `blogpost` | — |
-| wiki | `wiki page` | — |
+| boards | — | Message boards / forum |
+| calendar | — | Month/week/day grid over other packages' dated content |
 | fisheye | `fisheye` | Image gallery |
-| messages | — | Internal messaging |
-| util | — | Shared JavaScript, icons, cross-package utilities |
+| wiki | `wiki page` | — |
+| feed | — | Per-user activity feed, built on liberty's action log |
+| messages | — | Internal user-to-user messaging |
+| newsletters | — | Email newsletters to site users |
+| nexus | — | Multi-level dropdown menu builder |
+| rss | — | RSS feed reader/generator |
+| search | — | Site-wide content search |
+| stats | — | Site usage statistics |
+| tags | — | Cross-package content tagging |
+| ckeditor | — | Vendored WYSIWYG editor (CKEditor 4) |
