@@ -278,10 +278,13 @@ currently developed or installed anywhere:
 | `property` | Property information package |
 | `nlpg` | National Land and Property Gazetteer — address data source, related to `address` |
 | `paypal` | PayPal payment-information handling |
-| `tasks` | Task management |
-| `treasury` | — |
-| `bnspell` | Spell-checking |
+| `tasks` | Task management — worth another look now `calendar` is live |
+| `pigeonholes` | Possibly still useful, not yet evaluated against the current stack |
 | `theme_bootstrap` | Twitter Bootstrap-based theme |
+
+**Not a real distinct package**: `treasury` is just a renamed fork of `fisheye` that was never
+actually taken up as its own thing — flagged here so it isn't mistaken for a genuine unexplored
+package.
 
 `theme_colourstrap` (a colour-restoring Bootstrap theme variant) was evaluated and retired
 2026-08-11 in favour of loading `bootstrap.css` directly — a tried-and-dropped fork, not an
