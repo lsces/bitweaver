@@ -265,3 +265,24 @@ both.
 | stats | — | Site usage statistics |
 | tags | — | Cross-package content tagging |
 | ckeditor | — | Vendored WYSIWYG editor (CKEditor 4) |
+
+### Other forked packages, not yet adopted into this stack
+
+The `lsces` organisation also holds forks of a few more upstream bitweaver packages that aren't
+part of the active deployment above — kept as a starting point for possible future work, not
+currently developed or installed anywhere:
+
+| Package | Notes |
+|---|---|
+| `address` | Postal address facilities, meant to work alongside `contact`/`property` |
+| `property` | Property information package |
+| `nlpg` | National Land and Property Gazetteer — address data source, related to `address` |
+| `paypal` | PayPal payment-information handling |
+| `tasks` | Task management |
+| `treasury` | — |
+| `bnspell` | Spell-checking |
+| `theme_bootstrap` | Twitter Bootstrap-based theme |
+
+`theme_colourstrap` (a colour-restoring Bootstrap theme variant) was evaluated and retired
+2026-08-11 in favour of loading `bootstrap.css` directly — a tried-and-dropped fork, not an
+unexplored one.
