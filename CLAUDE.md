@@ -37,9 +37,14 @@ Servers do NOT pull from GitHub — they pull from the desktop's local copy. Aft
 server, clear the Smarty template cache and restart php-fpm.
 
 **Server topology, general deploy/ops philosophy, machine access, and the session-start sanity
-check now live one level up in `/srv/website/CLAUDE.md`** — read that first when starting a fresh
-session. Server configuration detail (nginx, PHP, Firebird, fail2ban, logging) is in
-`/etc/webstack/CLAUDE.md`, linked again from "Infrastructure" below.
+check live in the maintainer's own separate, private notes repo** — not part of this public
+checkout, so if you're building against this package outside the maintainer's own infrastructure,
+that repo (and the guidance below about `/etc/webstack`) won't exist for you; nothing in this
+public repo actually depends on its contents. Server configuration detail (nginx, PHP, Firebird,
+fail2ban, logging, real site/credential specifics) lives in `/etc/webstack` — **also its own
+separate private repo, deliberately never published here**, since site-specific deployment config
+is exactly the kind of thing that shouldn't live in a public package repo. See "Infrastructure"
+below for what it covers in general terms.
 
 ## Creating a New Package
 
@@ -236,10 +241,13 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
   CSV-tier-first v1 scope
 
 ## Infrastructure
-Detail lives in `/etc/webstack/CLAUDE.md` — its own repo, own `CLAUDE.md`, same pattern as the
-bitweaver packages above (`themes/CLAUDE.md` etc). Covers: site folder structure and symlink
-layout, `/etc/webstack` itself, the Firebird backup/DR mirror between srv9 and srv10, nginx log
-structure and logrotate gotchas, fail2ban (jails, known limitations), and nginx-stats/goaccess.
+Detail lives in `/etc/webstack/CLAUDE.md` — its own repo, own `CLAUDE.md`, structured the same way
+as the bitweaver packages above (`themes/CLAUDE.md` etc), but **private, pushed to a local bare
+repo only, never GitHub** — unlike every package repo here. Covers: site folder structure and
+symlink layout, `/etc/webstack` itself, the Firebird backup/DR mirror between srv9 and srv10,
+nginx log structure and logrotate gotchas, fail2ban (jails, known limitations), and
+nginx-stats/goaccess — real site/domain/credential specifics deliberately kept out of any
+publicly-published repo, this one included.
 
 ## Session Management
 At the end of each productive session, append discoveries, decisions, and completed items to this
