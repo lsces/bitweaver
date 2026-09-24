@@ -1,5 +1,6 @@
 vendor/*
 config/kernel/config_inc.php
+config/kernel/auth_config.php
 config/css/
 config/fonts/
 config/iconsets/
