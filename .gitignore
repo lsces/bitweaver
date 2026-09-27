@@ -15,8 +15,11 @@ config/themes/
 /calendar/
 /ckeditor/
 /contact/
+/contactindi/
+/contactwiki/
 /feed/
 /fisheye/
+/fisheyemedia/
 /food/
 /gatekeeper/
 /health/
