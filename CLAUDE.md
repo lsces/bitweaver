@@ -131,7 +131,7 @@ Detail for individual packages lives in their own `CLAUDE.md` files:
   xref-system reference
 - `contact/CLAUDE.md` — person/business model, ContactPerson/ContactBusiness history, install
   saga; `contact/MANUAL.md` — current schema/mechanisms reference
-- `stock/CLAUDE.md` — movement-model history, Firebird gotchas found; `stock/MANUAL.md` —
+- `stock/CLAUDE.md` — movement-model history, Firebird gotchas found; `stock/DEVELOPER.md` —
   current schema/mechanisms reference, kitlocker sync tooling
 - `wiki/CLAUDE.md` — `BitPage::store()` missing-`RollbackTrans` bug and its generic fix
   (`kernel/CLAUDE.md`'s transaction shutdown safety net); `wiki/MANUAL.md` — current
