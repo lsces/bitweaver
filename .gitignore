@@ -46,3 +46,6 @@ config/themes/
 /externals/
 /util/
 /utils/
+
+# Maintainer notes: a symlink into the private notes repo, never published (as in each package)
+CLAUDE.md
