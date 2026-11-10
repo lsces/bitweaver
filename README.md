@@ -369,8 +369,8 @@ Not yet reviewed or adopted, and not part of any release: there is no release ta
 and `get-packages.sh` fetches them from `master` with a notice. Use them knowing that.
 
 feed (per-user activity feed over the action log), messages (user-to-user messaging), newsletters
-(email newsletters), nexus (dropdown menu builder), stats (site usage statistics), tags (content
-tagging).
+(email newsletters), nexus (dropdown menu builder), stats (site usage statistics; the Search Statistics page belongs to `search` and needs no other package),
+tags (content tagging).
 
 ---
 

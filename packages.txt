@@ -38,8 +38,8 @@ stock           extensions    contact
 contactwiki     media         contact fisheyemedia
 fisheyemedia    media         fisheye contact contactwiki
 feed            experimental  # (none declared) per-user activity feed over liberty's action log
-messages        experimental  # (none declared)
-newsletters     experimental
+messages        experimental  # (none declared) user-to-user messaging
+newsletters     experimental  # email newsletters
 nexus           experimental  # (none declared) dropdown menus
-stats           experimental  # (none declared)
-tags            experimental
+stats           experimental  # (none declared) site usage statistics; search statistics are in search, not here
+tags            experimental  # content tagging
