@@ -48,6 +48,8 @@ for d in $BASE externals/adodb externals/smarty externals/htmlpurifier; do
 done
 find . -name .git -prune -exec rm -rf {} +
 for x in $EXCLUDE; do rm -rf "./$x"; done
+# repository and tool housekeeping files a download does not need (the third-party libraries under externals/ are left as their authors ship them)
+find . -not -path './externals/*' \( -name .gitignore -o -name .gitattributes -o -name .hgignore -o -name .hgtags -o -name .cvsignore -o -name .php-cs-fixer.php -o -name .editorconfig -o -name .github \) -prune -exec rm -rf {} +
 [ -z "$(find . -name .git | head -1)" ] || problem "git metadata left behind"
 
 if [ "$LINT" = 1 ]; then

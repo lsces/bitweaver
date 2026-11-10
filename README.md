@@ -284,7 +284,12 @@ packages and external libraries, while the default fetches the development tip (
 
 ## Packages in This Organisation
 
-Every package below is its own public repository at `https://github.com/lsces/<package>`.
+Every package is its own public repository at `https://github.com/lsces/<package>`. They fall into three
+groups, and `get-packages.sh` fetches them by group (see [Getting started](#getting-started)).
+
+### Core
+
+Always needed. `config/` and `storage/` are part of this wrapper repository itself.
 
 | Package | Content type | Notes |
 |---|---|---|
@@ -293,56 +298,46 @@ Every package below is its own public repository at `https://github.com/lsces/<p
 | users | — | Auth, roles, permissions |
 | themes | — | Layout, CSS loading, module system |
 | languages | — | Translations, `tra()` string lookup |
-| config | — | Site-level overrides (CSS, templates) |
 | util | — | Shared JavaScript, icons, cross-package utilities |
-| storage | — | Shared attachment/icon storage support |
 | install | — | Installer / upgrader |
 | protector | — | Row-level content permission enforcement, hooks into liberty |
+| ckeditor | — | Vendored WYSIWYG editor (CKEditor 4) |
+| config | — | Site-level overrides (CSS, templates) — in this repository |
+| storage | — | Shared attachment/icon storage support — in this repository |
+
+### Default content
+
+What a basic site is built from; fetched unless you ask for `--core-only`.
+
+| Package | Content type | Notes |
+|---|---|---|
+| wiki | `wiki page` | Wiki pages and books |
+| fisheye | `fisheye` | Image galleries |
+
+### Optional
+
+Fetched only when named (`./get-packages.sh blogs search`) or with `--all`.
+
+| Package | Content type | Notes |
+|---|---|---|
+| articles | `article` | Articles |
+| blogs | `blog`, `blogpost` | Blogs and posts |
+| boards | — | Message boards / forum |
+| calendar | — | Month/week/day grid over other packages' dated content |
 | contact | `contact`, `contactperson`, `contactbusiness` | Person and business contacts, CSV import |
-| stock | `stockassembly`, `stockcomponent`, `stockmovement` | BOM, stock levels, movement CSV import |
+| contactwiki | — | Wiki pages for contacts (needs `contact`) |
+| fisheyemedia | `fisheyemediagal`, `fisheyebook`, ... | Films, TV, music, a book Library with series and authors, documents (PDF and epub, with text search) and tutorials, built on fisheye |
 | food | `foodcomponent`, `foodassembly`, `foodmovement` | Nutrition/pantry tracking, Samsung Health CSV import |
 | health | `healthday` | Samsung Health / HealthForYou vitals import (weight, BP, pulse, SpO2, temperature, sleep, steps) |
 | mapper | `map` | MapServer-based GIS viewer, on-demand tile caching |
-| articles | `article` | — |
-| blogs | `blog`, `blogpost` | — |
-| boards | — | Message boards / forum |
-| calendar | — | Month/week/day grid over other packages' dated content |
-| fisheye | `fisheye` | Image gallery |
-| fisheyemedia | `fisheyemediagal`, `fisheyebook`, ... | Films, TV, music, a book Library with series and authors, documents (PDF and epub, with text search) and tutorials, built on fisheye |
-| wiki | `wiki page` | — |
-| feed | — | Per-user activity feed, built on liberty's action log |
 | messages | — | Internal user-to-user messaging |
 | newsletters | — | Email newsletters to site users |
 | nexus | — | Multi-level dropdown menu builder |
 | rss | — | RSS feed reader/generator |
 | search | — | Site-wide content search |
 | stats | — | Site usage statistics |
+| stock | `stockassembly`, `stockcomponent`, `stockmovement` | BOM, stock levels, movement CSV import |
 | tags | — | Cross-package content tagging |
-| ckeditor | — | Vendored WYSIWYG editor (CKEditor 4) |
-
-### Other forked packages, not yet adopted into this stack
-
-The `lsces` organisation also holds forks of a few more upstream bitweaver packages that aren't
-part of the active deployment above — kept as a starting point for possible future work, not
-currently developed or installed anywhere:
-
-| Package | Notes |
-|---|---|
-| `address` | Postal address facilities, meant to work alongside `contact`/`property` |
-| `property` | Property information package |
-| `nlpg` | National Land and Property Gazetteer — address data source, related to `address` |
-| `paypal` | PayPal payment-information handling |
-| `tasks` | Task management — worth another look now `calendar` is live |
-| `pigeonholes` | Possibly still useful, not yet evaluated against the current stack |
-| `theme_bootstrap` | Twitter Bootstrap-based theme |
-
-**Not a real distinct package**: `treasury` is just a renamed fork of `fisheye` that was never
-actually taken up as its own thing — flagged here so it isn't mistaken for a genuine unexplored
-package.
-
-`theme_colourstrap` (a colour-restoring Bootstrap theme variant) was evaluated and retired
-2026-08-11 in favour of loading `bootstrap.css` directly — a tried-and-dropped fork, not an
-unexplored one.
 
 ---
 
