@@ -1,13 +1,27 @@
 # bitweaver
 
-A personal fork of [bitweaver](http://www.bitweaver.org/) — a PHP CMS and application framework
-originally derived from TikiWiki. This organisation holds one repository per package, plus this
-wrapper repo tying them together. A real site symlinks each package it needs from a checkout of
-this wrapper into its own web root — all packages share one codebase, deployed together.
+**Bitweaver for modern PHP.** [Bitweaver](http://www.bitweaver.org/) is a PHP CMS and application
+framework descended from TikiWiki. This is a long-running fork, used on several live sites, that has
+been carried onto a current stack: PHP 8.5 with namespaces, Smarty 5 and ADOdb, with no npm or
+Node.js dependency. It is published here in the hope that parts of it are useful to others.
 
-Having used bitweaver for many years across several live sites, this fork has been carried forward
-into a modern stack: PHP 8.5, Firebird 5, Smarty 5 with namespaces, and adodb on a custom branch.
-It is published here in the hope that parts of it are useful to others.
+The code is split into one repository per package (kernel, liberty, fisheye and so on, listed
+[below](#packages-in-this-organisation)). This wrapper repository ties them together: a real site
+symlinks each package it needs from a checkout of the wrapper into its own web root, and all the
+packages share one codebase.
+
+## What is different from classic bitweaver
+
+- **Modern PHP.** Namespaced PHP 8.5 code throughout, with typed signatures where they help.
+- **Smarty 5** templates, still resolved through bitweaver's `bitpackage:` search path so a site can
+  override any template.
+- **Database portability kept.** The database layer is written to ADOdb, as in classic bitweaver, so
+  it is not tied to one engine. This fork is developed and run on Firebird 5; the installer still offers
+  the other engines classic bitweaver supported, but they are not exercised here.
+- **New packages** built on the Liberty content engine and its `xref` (key-value extension) system:
+  `fisheyemedia` (films, TV, music, a book library, documents and tutorials), plus `stock`, `food`,
+  `health`, `mapper` and `contact`.
+- **No build step.** Bootstrap 3 and jQuery as plain files; nothing to compile.
 
 ---
 
@@ -16,7 +30,7 @@ It is published here in the hope that parts of it are useful to others.
 | Layer | Technology |
 |---|---|
 | Language | PHP 8.5 |
-| Database | Firebird 5 via adodb (`v5.22.11-lsc` branch) |
+| Database | [ADOdb](https://github.com/lsces/ADOdb) (`v5.22.11-lsc` branch); developed and run on Firebird 5 |
 | Templates | Smarty 5 |
 | CSS/JS | Bootstrap 3, jQuery — no npm, no Node.js |
 | Web server | nginx + php-fpm |
@@ -111,7 +125,10 @@ Key adodb methods used throughout the codebase:
 
 Placeholders are always positional `?`. Named binds are not used.
 
-The database is **Firebird 5**. Firebird is stricter than MySQL in several ways that matter:
+This fork runs on **Firebird 5**. The code is written to ADOdb, so other engines the installer offers
+(MySQL, PostgreSQL and the like) remain the original options, though only Firebird is exercised here.
+Firebird is stricter than MySQL in several ways that matter, so code written for it is also the safe
+choice elsewhere:
 - Every non-aggregate `SELECT` column must appear in `GROUP BY`.
 - `IN ()` with an empty list is a syntax error — always guard with a fallback.
 - `FIRST n` / `ROWS n` for limiting result sets (not `LIMIT`).
@@ -231,7 +248,43 @@ both.
 
 ---
 
+## Getting started
+
+Bitweaver is meant to be taken in pieces: a small core, plus whichever packages a site wants. Each
+package is its own repository (this wrapper does not use git submodules), and `get-packages.sh` fetches
+them into the checkout.
+
+```bash
+git clone https://github.com/lsces/bitweaver.git
+cd bitweaver
+./get-packages.sh                    # core + wiki + fisheye + the external libraries
+./get-packages.sh blogs search       # ... plus these (and anything they say they need)
+```
+
+| Group | Packages | |
+|---|---|---|
+| **core** | kernel, liberty, users, themes, languages, util, install, protector, ckeditor | always fetched |
+| **default** | wiki, fisheye | a basic site: wiki pages and image galleries; fetched unless `--core-only` |
+| **optional** | articles, blogs, boards, calendar, contact, contactwiki, fisheyemedia, food, health, mapper, messages, newsletters, nexus, rss, search, stats, stock, tags | only when named, or with `--all` |
+
+Naming a package also fetches the packages it declares it needs (`fisheyemedia` pulls in `fisheye`,
+`contactwiki` pulls in `contact`). `./get-packages.sh --list` shows the groups; `--ref` fetches a branch
+or tag (`--ref V5.1.0` fetches every package and the patched ADOdb and Smarty at that release), `--full`
+keeps the whole history, `--update` brings what you already have up to date.
+`config/` and `storage/` are part of this wrapper and need no fetching. The external libraries land
+in `externals/`: [ADOdb](https://github.com/lsces/ADOdb) (the `v5.22.11-lsc` branch),
+[Smarty](https://github.com/lsces/smarty) and [HTMLPurifier](https://github.com/ezyang/htmlpurifier).
+
+A site then symlinks the packages it needs from this checkout into its web root, and the browser
+installer in `install/` creates the database and the tables for the packages you chose.
+
+The current release is **V5.1.0**: `./get-packages.sh --ref V5.1.0` fetches exactly that set of
+packages and external libraries, while the default fetches the development tip (`master`).
+---
+
 ## Packages in This Organisation
+
+Every package below is its own public repository at `https://github.com/lsces/<package>`.
 
 | Package | Content type | Notes |
 |---|---|---|
@@ -255,6 +308,7 @@ both.
 | boards | — | Message boards / forum |
 | calendar | — | Month/week/day grid over other packages' dated content |
 | fisheye | `fisheye` | Image gallery |
+| fisheyemedia | `fisheyemediagal`, `fisheyebook`, ... | Films, TV, music, a book Library with series and authors, documents (PDF and epub, with text search) and tutorials, built on fisheye |
 | wiki | `wiki page` | — |
 | feed | — | Per-user activity feed, built on liberty's action log |
 | messages | — | Internal user-to-user messaging |
@@ -289,3 +343,10 @@ package.
 `theme_colourstrap` (a colour-restoring Bootstrap theme variant) was evaluated and retired
 2026-08-11 in favour of loading `bootstrap.css` directly — a tried-and-dropped fork, not an
 unexplored one.
+
+---
+
+## License
+
+Licensed under the GNU Lesser General Public License, version 2.1 — see [LICENSE](LICENSE). The
+source files carry the same notice in their headers.

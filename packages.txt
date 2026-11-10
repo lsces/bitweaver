@@ -1,0 +1,40 @@
+# Packages of this bitweaver fork, one per line: name, group, then the packages it needs.
+#
+#   core      always fetched: bitweaver does not run without these
+#   default   fetched when no package is named: a basic site (wiki and image galleries)
+#   optional  fetched only when named on the command line (get-packages.sh blogs search)
+#
+# "needs" is what each package declares itself with registerRequirements() in admin/schema_inc.php, so
+# naming a package also fetches what it needs. A package that declares nothing is marked "(none declared)".
+# config/ and storage/ are part of this wrapper repository itself and need no fetch.
+#
+# name          group     needs
+kernel          core
+liberty         core
+users           core
+themes          core
+languages       core
+util            core      # (none declared)
+install         core      # (none declared)
+protector       core      # (none declared) registered as a required package
+ckeditor        core      # (none declared) the editor; the base page template includes its footer
+wiki            default
+fisheye         default
+articles        optional
+blogs           optional
+boards          optional
+calendar        optional
+contact         optional
+contactwiki     optional  contact
+fisheyemedia    optional  fisheye
+food            optional  contact
+health          optional
+mapper          optional  # (none declared)
+messages        optional  # (none declared)
+newsletters     optional
+nexus           optional  # (none declared) dropdown menus
+rss             optional  # (none declared) feeds, used by wiki and fisheye when present
+search          optional
+stats           optional  # (none declared)
+stock           optional  contact
+tags            optional
