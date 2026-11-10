@@ -141,7 +141,7 @@ choice elsewhere:
 Templates live in `<package>/templates/`. The `bitpackage:` Smarty resource prefix resolves
 templates through a search path that allows per-site overrides:
 
-1. `config/themes/<site>/` (symlink to `/etc/webstack/domains/<site>/themes/<site>/`)
+1. `config/themes/<site>/` (the site's own overrides)
 2. `<package>/templates/`
 
 This means dropping a template file into the site-specific path silently overrides the
