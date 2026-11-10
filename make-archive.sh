@@ -104,13 +104,15 @@ for T in $TARGETS; do
     case " features extensions media " in *" $T "*) ;; *) echo "   unknown target $T" >&2; exit 2 ;; esac
     TREE="$WORK/$T"; mkdir -p "$TREE/$NAME"; cp "$WORK/src/$NAME/get-packages.sh" "$WORK/src/$NAME/packages.txt" "$TREE/$NAME/"; cd "$TREE/$NAME"
     ./get-packages.sh --no-base --group "$T" --ref "$TAG" --org "$ORG" 2>&1 | grep -v "^warning" | sed 's/^/   /' | grep -E "clone|skipped|fatal|error|Unknown" || true
-    MEM=$(members "$T")
+    MEM=$(echo $(members "$T"))     # one line, space separated: it is matched as " name " below
     for n in $MEM; do [ -d "$n" ] || problem "package $n was not fetched"; at_tag "$n" "$TAG"; done
     # a package pulled in only as a need from another group (media needs contact) is not part of this add-on
     for d in */; do d=${d%/}; case " $MEM " in *" $d "*) ;; *) rm -rf "$d" ;; esac; done
+    NEEDS=$(for n in $MEM; do for d in $(needs_of "$n"); do case " $MEM " in *" $d "*) ;; *) echo "  $n needs $d ($(group_of "$d"))" ;; esac; done; done | sort -u)
     { echo "Add-on: $T (bitweaver $TAG)"; echo "Packages: $(echo $MEM)"; echo; echo "Unpack over the base download (same top folder). Needs:"
-      for n in $MEM; do for d in $(needs_of "$n"); do case " $MEM " in *" $d "*) ;; *) echo "  $n needs $d ($(group_of "$d"))" ;; esac; done; done | sort -u
-      [ "$T" = media ] && echo "  media: both packages are needed together, with contact (the extensions add-on)"; } > ADDON.txt
+      [ -n "$NEEDS" ] && echo "$NEEDS" || echo "  nothing beyond the base download"
+      if [ "$T" = media ]; then echo "  media: both packages are needed together, with contact (the extensions add-on)"; fi
+      if [ "$T" != media ]; then echo; echo "Each package here is optional on its own: copy only the folders you want."; fi; } > ADDON.txt
     rm -f get-packages.sh packages.txt
     cd "$WORK"; tidy "$TREE/$NAME"; lint "$TREE/$NAME"; FILEBASE=$NAME-$T
     sed 's/^/   | /' "$TREE/$NAME/ADDON.txt"
