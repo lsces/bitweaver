@@ -16,8 +16,6 @@
 #           --full       full history (default is a shallow clone, enough to run a site)
 #           --update     fast-forward packages that are already here instead of skipping them
 #           --org URL    where the package repositories are (default https://github.com/lsces; a local path works)
-#           --no-base    fetch only what is named (and what it needs from outside core and default); no core, no default, no libraries.
-#                        Used to build the add-on downloads.
 #
 # Nothing is overwritten: a package directory that exists is skipped (or fast-forwarded with --update).
 set -eu
@@ -26,7 +24,7 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 ORG=https://github.com/lsces
 REF=master
 DEPTH="--depth 1"
-UPDATE=0; ALL=0; CORE_ONLY=0; LIST=0; NOBASE=0
+UPDATE=0; ALL=0; CORE_ONLY=0; LIST=0
 WANT=(); WANTGROUP=()
 
 while [ $# -gt 0 ]; do
@@ -38,7 +36,6 @@ while [ $# -gt 0 ]; do
     --group)     WANTGROUP+=("$2"); shift ;;
     --all)       ALL=1 ;;
     --core-only) CORE_ONLY=1 ;;
-    --no-base)   NOBASE=1 ;;
     --list)      LIST=1 ;;
     -h|--help)   sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     -*)          echo "Unknown option: $1 (see --help)" >&2; exit 2 ;;
@@ -72,30 +69,24 @@ done
 declare -A CHOSEN
 CHOSEN_ORDER=()
 add() {
-  local n=$1 explicit=${2:-0}
+  local n=$1
   [ -n "${GROUP[$n]:-}" ] || { echo "Unknown package: $n (see ./get-packages.sh --list)" >&2; exit 2; }
   [ -n "${CHOSEN[$n]:-}" ] && return
-  # with --no-base the core and default packages are assumed to be there already
-  if [ "$NOBASE" = 1 ] && [ "$explicit" = 0 ]; then
-    case "${GROUP[$n]}" in core|default) return ;; esac
-  fi
   CHOSEN[$n]=1; CHOSEN_ORDER+=("$n")
-  for d in ${NEEDS[$n]}; do add "$d" 0; done
+  for d in ${NEEDS[$n]}; do add "$d"; done
 }
-if [ "$NOBASE" = 0 ]; then
-  for n in "${ORDER[@]}"; do
-    case "${GROUP[$n]}" in
-      core)    add "$n" 1 ;;
-      default) [ "$CORE_ONLY" = 0 ] && add "$n" 1 || true ;;
-    esac
-  done
-fi
+for n in "${ORDER[@]}"; do
+  case "${GROUP[$n]}" in
+    core)    add "$n" ;;
+    default) [ "$CORE_ONLY" = 0 ] && add "$n" || true ;;
+  esac
+done
 for n in "${ORDER[@]}"; do
   g=${GROUP[$n]}
-  [ "$ALL" = 1 ] && case "$g" in features|extensions|media) add "$n" 1 ;; esac
-  for w in "${WANTGROUP[@]:-}"; do [ "$g" = "$w" ] && add "$n" 1; done
+  [ "$ALL" = 1 ] && case "$g" in features|extensions|media) add "$n" ;; esac
+  for w in "${WANTGROUP[@]:-}"; do [ "$g" = "$w" ] && add "$n"; done
 done
-for n in "${WANT[@]:-}"; do [ -z "$n" ] || add "$n" 1; done
+for n in "${WANT[@]:-}"; do [ -z "$n" ] || add "$n"; done
 
 url() { case "$ORG" in /*) echo "$ORG/$1" ;; *) echo "$ORG/$1.git" ;; esac; }
 
@@ -126,18 +117,16 @@ for n in "${CHOSEN_ORDER[@]}"; do
   fi
 done
 
-if [ "$NOBASE" = 0 ]; then
-  echo "External libraries (externals/):"
-  # ADOdb and Smarty are patched forks tagged with each release, like the packages; HTMLPurifier is upstream's, pinned by its own tag.
-  if [ "$REF" = master ]; then
-    fetch externals/adodb        https://github.com/lsces/ADOdb.git          v5.22.11-lsc
-    fetch externals/smarty       https://github.com/lsces/smarty.git         master
-    fetch externals/htmlpurifier https://github.com/ezyang/htmlpurifier.git  master
-  else
-    fetch externals/adodb        https://github.com/lsces/ADOdb.git          "$REF"
-    fetch externals/smarty       https://github.com/lsces/smarty.git         "$REF"
-    fetch externals/htmlpurifier https://github.com/ezyang/htmlpurifier.git  v4.19.0
-  fi
+echo "External libraries (externals/):"
+# ADOdb and Smarty are patched forks tagged with each release, like the packages; HTMLPurifier is upstream's, pinned by its own tag.
+if [ "$REF" = master ]; then
+  fetch externals/adodb        https://github.com/lsces/ADOdb.git          v5.22.11-lsc
+  fetch externals/smarty       https://github.com/lsces/smarty.git         master
+  fetch externals/htmlpurifier https://github.com/ezyang/htmlpurifier.git  master
+else
+  fetch externals/adodb        https://github.com/lsces/ADOdb.git          "$REF"
+  fetch externals/smarty       https://github.com/lsces/smarty.git         "$REF"
+  fetch externals/htmlpurifier https://github.com/ezyang/htmlpurifier.git  v4.19.0
 fi
 
 if [ ${#EXPERIMENTAL[@]} -gt 0 ]; then

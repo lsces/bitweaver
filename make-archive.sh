@@ -3,21 +3,20 @@
 # Build the downloads of a release from its public tag:
 #
 #   bitweaver-TAG.zip / .tar.gz              the BASE: core + default packages (wiki, fisheye) + external libraries, as one self-contained tree
-#   bitweaver-TAG-features.zip / .tar.gz     add-on: the features group (each package optional on its own)
-#   bitweaver-TAG-extensions.zip / .tar.gz   add-on: the extensions group (each package optional on its own)
-#   bitweaver-TAG-media.zip / .tar.gz        add-on: the media management upgrade (needs contact, and both its packages together)
+#   bitweaver-TAG-PACKAGE.zip / .tar.gz      one for every other released package (features, extensions and media groups): just that
+#                                            package's folder, under the same top folder as the base, so it unpacks over it
 #
-# An add-on unpacks over the base (same top folder) and contains only its own packages plus ADDON.txt, which says what else it needs.
-# The experimental group is never built. SHA256SUMS-TAG.txt lists every file made.
+# There are no group bundles. The experimental group is never built. DOWNLOADS-TAG.md is a table of the packages, their groups and what
+# each needs, for the release page; SHA256SUMS-TAG.txt lists every file made.
 #
-#   ./make-archive.sh V5.1.1                    all four, in the current directory
+#   ./make-archive.sh V5.1.1                    the base and every package, in the current directory
 #   ./make-archive.sh V5.1.1 --out DIR          put them in DIR
-#   ./make-archive.sh V5.1.1 --only media       just one (base, features, extensions or media; repeatable)
+#   ./make-archive.sh V5.1.1 --only contact     just one (base, or a package name; repeatable)
 #   ./make-archive.sh V5.1.1 --lint             also run `php -l` over every PHP file and report syntax errors
 #   ./make-archive.sh V5.1.1 --org URL          fetch the package repositories from somewhere else than https://github.com/lsces
 #   ./make-archive.sh master --wrapper PATH     TAG may be a branch, and the wrapper itself can come from a local path (for a trial run)
 #
-# It fetches exactly as a user would (`get-packages.sh --ref TAG`), so building the downloads is also a test that the tag can be fetched.
+# The base is fetched exactly as a user would (`get-packages.sh --ref TAG`), so building it is also a test that the tag can be fetched.
 # Legacy test directories and repository housekeeping files are left out. Needs git, python3 and tar; `zip` is not required.
 set -eu
 TAG=${1:-}; shift || true
@@ -26,7 +25,6 @@ while [ $# -gt 0 ]; do case "$1" in
   --out) OUT=$(cd "$2" && pwd); shift ;; --org) ORG=${2%/}; shift ;; --wrapper) WRAPSRC=$2; shift ;; --lint) LINT=1 ;;
   --only) ONLY+=("$2"); shift ;; *) echo "unknown option $1" >&2; exit 2 ;; esac; shift; done
 [ -n "$TAG" ] || { sed -n 3,24p "$0" | sed 's/^# \{0,1\}//'; exit 2; }
-TARGETS=${ONLY[*]:-base features extensions media}
 
 NAME=bitweaver-$TAG
 # directories of tests that a release does not need (kernel/test is old SimpleTest code; the videojs one is the library's own tests)
@@ -44,6 +42,9 @@ members() { awk -v g="$1" '!/^#/ && NF && $2==g{print $1}' "$PKGTXT"; }
 needs_of() { awk -v n="$1" '!/^#/ && NF && $1==n{ $1=""; $2=""; sub(/#.*/,""); print }' "$PKGTXT"; }
 group_of() { awk -v n="$1" '!/^#/ && NF && $1==n{print $2}' "$PKGTXT"; }
 BASE="$(members core) $(members default)"
+RELEASED=$(echo $(members features) $(members extensions) $(members media))
+TARGETS=${ONLY[*]:-base $RELEASED}
+url() { case "$ORG" in /*) echo "$ORG/$1" ;; *) echo "$ORG/$1.git" ;; esac; }
 
 tidy() {   # tidy TREE: drop git metadata, legacy tests and repository housekeeping files
   ( cd "$1"
@@ -87,6 +88,7 @@ PY
 }
 
 : > "$OUT/SHA256SUMS-$TAG.txt"
+{ echo "| Package | Group | Needs | Download |"; echo "|---|---|---|---|"; } > "$OUT/DOWNLOADS-$TAG.md"
 for T in $TARGETS; do
   echo; echo "== $T"
   if [ "$T" = base ]; then
@@ -101,24 +103,19 @@ for T in $TARGETS; do
     [ -f externals/smarty/src/Smarty.php ] || problem "externals/smarty/src/Smarty.php missing"
     cd "$WORK"; tidy "$TREE/$NAME"; lint "$TREE/$NAME"; FILEBASE=$NAME
   else
-    case " features extensions media " in *" $T "*) ;; *) echo "   unknown target $T" >&2; exit 2 ;; esac
-    TREE="$WORK/$T"; mkdir -p "$TREE/$NAME"; cp "$WORK/src/$NAME/get-packages.sh" "$WORK/src/$NAME/packages.txt" "$TREE/$NAME/"; cd "$TREE/$NAME"
-    ./get-packages.sh --no-base --group "$T" --ref "$TAG" --org "$ORG" 2>&1 | grep -v "^warning" | sed 's/^/   /' | grep -E "clone|skipped|fatal|error|Unknown" || true
-    MEM=$(echo $(members "$T"))     # one line, space separated: it is matched as " name " below
-    for n in $MEM; do [ -d "$n" ] || problem "package $n was not fetched"; at_tag "$n" "$TAG"; done
-    # a package pulled in only as a need from another group (media needs contact) is not part of this add-on
-    for d in */; do d=${d%/}; case " $MEM " in *" $d "*) ;; *) rm -rf "$d" ;; esac; done
-    NEEDS=$(for n in $MEM; do for d in $(needs_of "$n"); do case " $MEM " in *" $d "*) ;; *) echo "  $n needs $d ($(group_of "$d"))" ;; esac; done; done | sort -u)
-    { echo "Add-on: $T (bitweaver $TAG)"; echo "Packages: $(echo $MEM)"; echo; echo "Unpack over the base download (same top folder). Needs:"
-      [ -n "$NEEDS" ] && echo "$NEEDS" || echo "  nothing beyond the base download"
-      if [ "$T" = media ]; then echo "  media: both packages are needed together, with contact (the extensions add-on)"; fi
-      if [ "$T" != media ]; then echo; echo "Each package here is optional on its own: copy only the folders you want."; fi; } > ADDON.txt
-    rm -f get-packages.sh packages.txt
-    cd "$WORK"; tidy "$TREE/$NAME"; lint "$TREE/$NAME"; FILEBASE=$NAME-$T
-    sed 's/^/   | /' "$TREE/$NAME/ADDON.txt"
+    case " $RELEASED " in *" $T "*) ;; *) echo "   unknown target $T (base, or one of: $RELEASED)" >&2; exit 2 ;; esac
+    TREE="$WORK/pkg-$T"; mkdir -p "$TREE/$NAME"
+    git clone -q --depth 1 --branch "$TAG" "$(url "$T")" "$TREE/$NAME/$T" 2>&1 | grep -v "^warning\|^Note: switching\|^$" | head -2 || true
+    [ -d "$TREE/$NAME/$T" ] || problem "package $T was not fetched"
+    at_tag "$TREE/$NAME/$T" "$TAG"
+    tidy "$TREE/$NAME"; lint "$TREE/$NAME"; FILEBASE=$NAME-$T
+    echo "   $T ($(group_of "$T")); needs: $(echo $(needs_of "$T"))"
   fi
   pack "$TREE" "$FILEBASE"
   ( cd "$OUT" && sha256sum "$FILEBASE.zip" "$FILEBASE.tar.gz" >> "SHA256SUMS-$TAG.txt" )
+  if [ "$T" != base ]; then
+    printf '| %s | %s | %s | `%s.zip` (%s KB) |\n' "$T" "$(group_of "$T")" "$(echo $(needs_of "$T") | sed 's/^$/-/')" "$FILEBASE" "$(( $(stat -c %s "$OUT/$FILEBASE.zip") / 1024 ))" >> "$OUT/DOWNLOADS-$TAG.md"
+  fi
 done
 echo
 [ "$PROBLEMS" = 0 ] && echo "No problems found." || echo "$PROBLEMS problem(s) found - see above."

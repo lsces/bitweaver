@@ -258,14 +258,12 @@ package is its own repository (this wrapper does not use git submodules).
 | File | What it is |
 |---|---|
 | `bitweaver-V5.1.1.zip` / `.tar.gz` | **The base**: core, wiki, fisheye and the external libraries — one self-contained tree |
-| `bitweaver-V5.1.1-features.zip` | Add-on: articles, blogs, boards, calendar, rss, search |
-| `bitweaver-V5.1.1-extensions.zip` | Add-on: contact, food, health, mapper, stock |
-| `bitweaver-V5.1.1-media.zip` | Add-on: the media management upgrade (contactwiki and fisheyemedia) |
+| `bitweaver-V5.1.1-<package>.zip` | Any other package, on its own: just that package's folder |
 
-An add-on unpacks over the base (same top folder) and contains only its own packages, plus an
-`ADDON.txt` saying what else it needs. Take only the packages you want; within *features* and
-*extensions* each package is optional on its own. *Media* needs the `contact` package (from
-*extensions*), and both of its packages together.
+Every package other than the base is a separate download; there are no bundles. A package unpacks
+over the base (same top folder). The release page lists each package with what it needs: `food`
+and `stock` need `contact`, and the two media packages (`contactwiki` and `fisheyemedia`) need
+`contact` and each other.
 
 ### Or with git
 
@@ -326,7 +324,7 @@ What a basic site is built from; part of the base download.
 
 ### Features
 
-Site features; each is optional on its own (add-on `features`).
+Site features; each is optional on its own.
 
 | Package | Content type | Notes |
 |---|---|---|
@@ -339,7 +337,7 @@ Site features; each is optional on its own (add-on `features`).
 
 ### Extensions
 
-Functional extensions; each is optional on its own (add-on `extensions`).
+Functional extensions; each is optional on its own.
 
 | Package | Content type | Notes |
 |---|---|---|
@@ -351,7 +349,7 @@ Functional extensions; each is optional on its own (add-on `extensions`).
 
 ### Media
 
-The media management upgrade (add-on `media`). It needs `contact`, and **both** packages together.
+The media management upgrade. It needs `contact`, and **both** packages together.
 
 | Package | Content type | Notes |
 |---|---|---|
