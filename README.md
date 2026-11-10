@@ -258,12 +258,19 @@ package is its own repository (this wrapper does not use git submodules).
 | File | What it is |
 |---|---|
 | `bitweaver-V5.1.1.zip` / `.tar.gz` | **The base**: core, wiki, fisheye and the external libraries — one self-contained tree |
-| `bitweaver-V5.1.1-<package>.zip` | Any other package, on its own: just that package's folder |
 
-Every package other than the base is a separate download; there are no bundles. A package unpacks
-over the base (same top folder). The release page lists each package with what it needs: `food`
-and `stock` need `contact`, and the two media packages (`contactwiki` and `fisheyemedia`) need
-`contact` and each other.
+That is the only bundle, because it spans many repositories. **Every other package is its own
+repository, and GitHub makes the archive of a release tag for you:**
+
+```
+https://github.com/lsces/<package>/archive/refs/tags/V5.1.1.zip     (or .tar.gz)
+```
+
+Each package's row in the tables below has the link. A GitHub archive unpacks into a folder named
+`<package>-5.1.1`: **rename it to `<package>`** and put it in the base next to `wiki/` and `fisheye/`.
+(It also contains the repository's own `.gitignore`, which you can delete.) Packages are optional on
+their own, except that `food` and `stock` need `contact`, and the two media packages (`contactwiki`
+and `fisheyemedia`) need `contact` and each other; the tables say so.
 
 ### Or with git
 
@@ -326,35 +333,35 @@ What a basic site is built from; part of the base download.
 
 Site features; each is optional on its own.
 
-| Package | Content type | Notes |
-|---|---|---|
-| articles | `article` | Articles |
-| blogs | `blog`, `blogpost` | Blogs and posts |
-| boards | — | Message boards / forum |
-| calendar | — | Month/week/day grid over other packages' dated content |
-| rss | — | RSS feed reader/generator |
-| search | — | Site-wide content search |
+| Package | Content type | Notes | Download |
+|---|---|---|---|
+| articles | `article` | Articles | [zip](https://github.com/lsces/articles/archive/refs/tags/V5.1.1.zip) |
+| blogs | `blog`, `blogpost` | Blogs and posts | [zip](https://github.com/lsces/blogs/archive/refs/tags/V5.1.1.zip) |
+| boards | — | Message boards / forum | [zip](https://github.com/lsces/boards/archive/refs/tags/V5.1.1.zip) |
+| calendar | — | Month/week/day grid over other packages' dated content | [zip](https://github.com/lsces/calendar/archive/refs/tags/V5.1.1.zip) |
+| rss | — | RSS feed reader/generator | [zip](https://github.com/lsces/rss/archive/refs/tags/V5.1.1.zip) |
+| search | — | Site-wide content search | [zip](https://github.com/lsces/search/archive/refs/tags/V5.1.1.zip) |
 
 ### Extensions
 
 Functional extensions; each is optional on its own.
 
-| Package | Content type | Notes |
-|---|---|---|
-| contact | `contact`, `contactperson`, `contactbusiness` | Person and business contacts, CSV import |
-| food | `foodcomponent`, `foodassembly`, `foodmovement` | Nutrition/pantry tracking, Samsung Health CSV import (needs `contact`) |
-| health | `healthday` | Samsung Health / HealthForYou vitals import (weight, BP, pulse, SpO2, temperature, sleep, steps) |
-| mapper | `map` | MapServer-based GIS viewer, on-demand tile caching |
-| stock | `stockassembly`, `stockcomponent`, `stockmovement` | BOM, stock levels, movement CSV import (needs `contact`) |
+| Package | Content type | Notes | Download |
+|---|---|---|---|
+| contact | `contact`, `contactperson`, `contactbusiness` | Person and business contacts, CSV import | [zip](https://github.com/lsces/contact/archive/refs/tags/V5.1.1.zip) |
+| food | `foodcomponent`, `foodassembly`, `foodmovement` | Nutrition/pantry tracking, Samsung Health CSV import (needs `contact`) | [zip](https://github.com/lsces/food/archive/refs/tags/V5.1.1.zip) |
+| health | `healthday` | Samsung Health / HealthForYou vitals import (weight, BP, pulse, SpO2, temperature, sleep, steps) | [zip](https://github.com/lsces/health/archive/refs/tags/V5.1.1.zip) |
+| mapper | `map` | MapServer-based GIS viewer, on-demand tile caching | [zip](https://github.com/lsces/mapper/archive/refs/tags/V5.1.1.zip) |
+| stock | `stockassembly`, `stockcomponent`, `stockmovement` | BOM, stock levels, movement CSV import (needs `contact`) | [zip](https://github.com/lsces/stock/archive/refs/tags/V5.1.1.zip) |
 
 ### Media
 
 The media management upgrade. It needs `contact`, and **both** packages together.
 
-| Package | Content type | Notes |
-|---|---|---|
-| contactwiki | — | Wiki pages for contacts |
-| fisheyemedia | `fisheyemediagal`, `fisheyebook`, ... | Films, TV, music, a book Library with series and authors, documents (PDF and epub, with text search) and tutorials, built on fisheye |
+| Package | Content type | Notes | Download |
+|---|---|---|---|
+| contactwiki | — | Wiki pages for contacts (needs `contact` and `fisheyemedia`) | [zip](https://github.com/lsces/contactwiki/archive/refs/tags/V5.1.1.zip) |
+| fisheyemedia | `fisheyemediagal`, `fisheyebook`, ... | Films, TV, music, a book Library with series and authors, documents (PDF and epub, with text search) and tutorials, built on fisheye (needs `fisheye`, `contact` and `contactwiki`) | [zip](https://github.com/lsces/fisheyemedia/archive/refs/tags/V5.1.1.zip) |
 
 ### Experimental
 
