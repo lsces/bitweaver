@@ -250,42 +250,52 @@ both.
 
 ## Getting started
 
-Bitweaver is meant to be taken in pieces: a small core, plus whichever packages a site wants. Each
-package is its own repository (this wrapper does not use git submodules), and `get-packages.sh` fetches
-them into the checkout.
+Bitweaver is meant to be taken in pieces: a small **base**, plus whichever packages a site wants. Each
+package is its own repository (this wrapper does not use git submodules).
+
+### Download
+
+| File | What it is |
+|---|---|
+| `bitweaver-V5.1.1.zip` / `.tar.gz` | **The base**: core, wiki, fisheye and the external libraries — one self-contained tree |
+| `bitweaver-V5.1.1-features.zip` | Add-on: articles, blogs, boards, calendar, rss, search |
+| `bitweaver-V5.1.1-extensions.zip` | Add-on: contact, food, health, mapper, stock |
+| `bitweaver-V5.1.1-media.zip` | Add-on: the media management upgrade (contactwiki and fisheyemedia) |
+
+An add-on unpacks over the base (same top folder) and contains only its own packages, plus an
+`ADDON.txt` saying what else it needs. Take only the packages you want; within *features* and
+*extensions* each package is optional on its own. *Media* needs the `contact` package (from
+*extensions*), and both of its packages together.
+
+### Or with git
 
 ```bash
 git clone https://github.com/lsces/bitweaver.git
 cd bitweaver
-./get-packages.sh                    # core + wiki + fisheye + the external libraries
+./get-packages.sh                    # the base: core + wiki + fisheye + the external libraries
 ./get-packages.sh blogs search       # ... plus these (and anything they say they need)
+./get-packages.sh --group extensions # ... plus a whole group
 ```
 
-| Group | Packages | |
-|---|---|---|
-| **core** | kernel, liberty, users, themes, languages, util, install, protector, ckeditor | always fetched |
-| **default** | wiki, fisheye | a basic site: wiki pages and image galleries; fetched unless `--core-only` |
-| **optional** | articles, blogs, boards, calendar, contact, contactwiki, fisheyemedia, food, health, mapper, messages, newsletters, nexus, rss, search, stats, stock, tags | only when named, or with `--all` |
-
-Naming a package also fetches the packages it declares it needs (`fisheyemedia` pulls in `fisheye`,
-`contactwiki` pulls in `contact`). `./get-packages.sh --list` shows the groups; `--ref` fetches a branch
-or tag (`--ref V5.1.0` fetches every package and the patched ADOdb and Smarty at that release), `--full`
-keeps the whole history, `--update` brings what you already have up to date.
-`config/` and `storage/` are part of this wrapper and need no fetching. The external libraries land
-in `externals/`: [ADOdb](https://github.com/lsces/ADOdb) (the `v5.22.11-lsc` branch),
-[Smarty](https://github.com/lsces/smarty) and [HTMLPurifier](https://github.com/ezyang/htmlpurifier).
+`./get-packages.sh --list` shows the groups; `--all` fetches every released package; `--ref V5.1.1`
+fetches exactly that release (every package and the patched ADOdb and Smarty at one tag); `--full`
+keeps the whole history; `--update` brings what you already have up to date. Naming a package also
+fetches the packages it declares it needs (`food` pulls in `contact`; either media package pulls in
+the other and `contact`). `config/` and `storage/` are part of this wrapper and need no fetching. The
+external libraries land in `externals/`: [ADOdb](https://github.com/lsces/ADOdb) (the `v5.22.11-lsc`
+branch), [Smarty](https://github.com/lsces/smarty) and [HTMLPurifier](https://github.com/ezyang/htmlpurifier).
 
 A site then symlinks the packages it needs from this checkout into its web root, and the browser
 installer in `install/` creates the database and the tables for the packages you chose.
 
-The current release is **V5.1.0**: `./get-packages.sh --ref V5.1.0` fetches exactly that set of
-packages and external libraries, while the default fetches the development tip (`master`).
+The current release is **V5.1.1**.
+
 ---
 
 ## Packages in This Organisation
 
-Every package is its own public repository at `https://github.com/lsces/<package>`. They fall into three
-groups, and `get-packages.sh` fetches them by group (see [Getting started](#getting-started)).
+Every package is its own public repository at `https://github.com/lsces/<package>`. They fall into
+groups (`packages.txt`), and `get-packages.sh` fetches them by group.
 
 ### Core
 
@@ -307,16 +317,16 @@ Always needed. `config/` and `storage/` are part of this wrapper repository itse
 
 ### Default content
 
-What a basic site is built from; fetched unless you ask for `--core-only`.
+What a basic site is built from; part of the base download.
 
 | Package | Content type | Notes |
 |---|---|---|
 | wiki | `wiki page` | Wiki pages and books |
 | fisheye | `fisheye` | Image galleries |
 
-### Optional
+### Features
 
-Fetched only when named (`./get-packages.sh blogs search`) or with `--all`.
+Site features; each is optional on its own (add-on `features`).
 
 | Package | Content type | Notes |
 |---|---|---|
@@ -324,20 +334,38 @@ Fetched only when named (`./get-packages.sh blogs search`) or with `--all`.
 | blogs | `blog`, `blogpost` | Blogs and posts |
 | boards | — | Message boards / forum |
 | calendar | — | Month/week/day grid over other packages' dated content |
-| contact | `contact`, `contactperson`, `contactbusiness` | Person and business contacts, CSV import |
-| contactwiki | — | Wiki pages for contacts (needs `contact`) |
-| fisheyemedia | `fisheyemediagal`, `fisheyebook`, ... | Films, TV, music, a book Library with series and authors, documents (PDF and epub, with text search) and tutorials, built on fisheye |
-| food | `foodcomponent`, `foodassembly`, `foodmovement` | Nutrition/pantry tracking, Samsung Health CSV import |
-| health | `healthday` | Samsung Health / HealthForYou vitals import (weight, BP, pulse, SpO2, temperature, sleep, steps) |
-| mapper | `map` | MapServer-based GIS viewer, on-demand tile caching |
-| messages | — | Internal user-to-user messaging |
-| newsletters | — | Email newsletters to site users |
-| nexus | — | Multi-level dropdown menu builder |
 | rss | — | RSS feed reader/generator |
 | search | — | Site-wide content search |
-| stats | — | Site usage statistics |
-| stock | `stockassembly`, `stockcomponent`, `stockmovement` | BOM, stock levels, movement CSV import |
-| tags | — | Cross-package content tagging |
+
+### Extensions
+
+Functional extensions; each is optional on its own (add-on `extensions`).
+
+| Package | Content type | Notes |
+|---|---|---|
+| contact | `contact`, `contactperson`, `contactbusiness` | Person and business contacts, CSV import |
+| food | `foodcomponent`, `foodassembly`, `foodmovement` | Nutrition/pantry tracking, Samsung Health CSV import (needs `contact`) |
+| health | `healthday` | Samsung Health / HealthForYou vitals import (weight, BP, pulse, SpO2, temperature, sleep, steps) |
+| mapper | `map` | MapServer-based GIS viewer, on-demand tile caching |
+| stock | `stockassembly`, `stockcomponent`, `stockmovement` | BOM, stock levels, movement CSV import (needs `contact`) |
+
+### Media
+
+The media management upgrade (add-on `media`). It needs `contact`, and **both** packages together.
+
+| Package | Content type | Notes |
+|---|---|---|
+| contactwiki | — | Wiki pages for contacts |
+| fisheyemedia | `fisheyemediagal`, `fisheyebook`, ... | Films, TV, music, a book Library with series and authors, documents (PDF and epub, with text search) and tutorials, built on fisheye |
+
+### Experimental
+
+Not yet reviewed or adopted, and not part of any release: there is no release tag and no download,
+and `get-packages.sh` fetches them from `master` with a notice. Use them knowing that.
+
+feed (per-user activity feed over the action log), messages (user-to-user messaging), newsletters
+(email newsletters), nexus (dropdown menu builder), stats (site usage statistics), tags (content
+tagging).
 
 ---
 

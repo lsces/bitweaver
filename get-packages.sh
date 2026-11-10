@@ -1,19 +1,23 @@
 #!/bin/bash
 #
-# Fetch bitweaver packages into this checkout. Every package is its own repository (this wrapper does not use
-# git submodules), and a site needs only some of them - see packages.txt for the groups:
+# Fetch bitweaver packages into this checkout. Every package is its own repository (this wrapper does not use git submodules), and a
+# site needs only some of them - packages.txt lists the groups:
 #
-#   ./get-packages.sh                      core + the default content packages (wiki, fisheye) + the external libraries
+#   ./get-packages.sh                      the base: core + the default content packages (wiki, fisheye) + the external libraries
 #   ./get-packages.sh blogs search         ... plus these, and whatever they declare they need
-#   ./get-packages.sh --core-only          just the core
-#   ./get-packages.sh --all                every package
+#   ./get-packages.sh --group extensions   ... plus every package of a group (features, extensions, media, experimental)
+#   ./get-packages.sh --all                every released package (all groups except experimental)
+#   ./get-packages.sh --core-only          just the core and the external libraries
 #   ./get-packages.sh --list               show the groups and exit
 #
-# Options:  --ref REF    a branch or tag to fetch (default master). Releases are tagged with the same name in every
-#                        package repository, so --ref V5.1.0 fetches one consistent set.
+# Options:  --ref REF    a branch or tag to fetch (default master). A release is tagged with the same name in every released package
+#                        repository, so --ref V5.1.1 fetches one consistent set. Experimental packages have no release tag and are
+#                        always fetched from master, with a notice.
 #           --full       full history (default is a shallow clone, enough to run a site)
 #           --update     fast-forward packages that are already here instead of skipping them
 #           --org URL    where the package repositories are (default https://github.com/lsces; a local path works)
+#           --no-base    fetch only what is named (and what it needs from outside core and default); no core, no default, no libraries.
+#                        Used to build the add-on downloads.
 #
 # Nothing is overwritten: a package directory that exists is skipped (or fast-forwarded with --update).
 set -eu
@@ -22,8 +26,8 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 ORG=https://github.com/lsces
 REF=master
 DEPTH="--depth 1"
-UPDATE=0; ALL=0; CORE_ONLY=0; LIST=0
-WANT=()
+UPDATE=0; ALL=0; CORE_ONLY=0; LIST=0; NOBASE=0
+WANT=(); WANTGROUP=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -31,10 +35,12 @@ while [ $# -gt 0 ]; do
     --full)      DEPTH="" ;;
     --update)    UPDATE=1 ;;
     --org)       ORG=${2%/}; shift ;;
+    --group)     WANTGROUP+=("$2"); shift ;;
     --all)       ALL=1 ;;
     --core-only) CORE_ONLY=1 ;;
+    --no-base)   NOBASE=1 ;;
     --list)      LIST=1 ;;
-    -h|--help)   sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help)   sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     -*)          echo "Unknown option: $1 (see --help)" >&2; exit 2 ;;
     *)           WANT+=("$1") ;;
   esac
@@ -49,31 +55,47 @@ while read -r name group needs; do
   needs=${needs%%#*}                 # trailing comment
   GROUP[$name]=$group; NEEDS[$name]=$needs; ORDER+=("$name")
 done < "$HERE/packages.txt"
+GROUPS_ALL="core default features extensions media experimental"
 
 if [ "$LIST" = 1 ]; then
-  for g in core default optional; do
-    printf '%-9s' "$g"; for n in "${ORDER[@]}"; do [ "${GROUP[$n]}" = "$g" ] && printf ' %s' "$n"; done; echo
+  for g in $GROUPS_ALL; do
+    printf '%-13s' "$g"; for n in "${ORDER[@]}"; do [ "${GROUP[$n]}" = "$g" ] && printf ' %s' "$n"; done; echo
   done
   exit 0
 fi
 
+for g in "${WANTGROUP[@]:-}"; do
+  [ -z "$g" ] && continue
+  case " $GROUPS_ALL " in *" $g "*) ;; *) echo "Unknown group: $g (see ./get-packages.sh --list)" >&2; exit 2 ;; esac
+done
+
 declare -A CHOSEN
 CHOSEN_ORDER=()
 add() {
-  local n=$1
+  local n=$1 explicit=${2:-0}
   [ -n "${GROUP[$n]:-}" ] || { echo "Unknown package: $n (see ./get-packages.sh --list)" >&2; exit 2; }
   [ -n "${CHOSEN[$n]:-}" ] && return
+  # with --no-base the core and default packages are assumed to be there already
+  if [ "$NOBASE" = 1 ] && [ "$explicit" = 0 ]; then
+    case "${GROUP[$n]}" in core|default) return ;; esac
+  fi
   CHOSEN[$n]=1; CHOSEN_ORDER+=("$n")
-  for d in ${NEEDS[$n]}; do add "$d"; done
+  for d in ${NEEDS[$n]}; do add "$d" 0; done
 }
+if [ "$NOBASE" = 0 ]; then
+  for n in "${ORDER[@]}"; do
+    case "${GROUP[$n]}" in
+      core)    add "$n" 1 ;;
+      default) [ "$CORE_ONLY" = 0 ] && add "$n" 1 || true ;;
+    esac
+  done
+fi
 for n in "${ORDER[@]}"; do
-  case "${GROUP[$n]}" in
-    core)    add "$n" ;;
-    default) [ "$CORE_ONLY" = 0 ] && add "$n" || true ;;
-    optional) [ "$ALL" = 1 ] && add "$n" || true ;;
-  esac
+  g=${GROUP[$n]}
+  [ "$ALL" = 1 ] && case "$g" in features|extensions|media) add "$n" 1 ;; esac
+  for w in "${WANTGROUP[@]:-}"; do [ "$g" = "$w" ] && add "$n" 1; done
 done
-for n in "${WANT[@]}"; do add "$n"; done
+for n in "${WANT[@]:-}"; do [ -z "$n" ] || add "$n" 1; done
 
 url() { case "$ORG" in /*) echo "$ORG/$1" ;; *) echo "$ORG/$1.git" ;; esac; }
 
@@ -95,19 +117,32 @@ fetch() {   # fetch DIR URL REF
 }
 
 echo "Packages (${REF}):"
-for n in "${CHOSEN_ORDER[@]}"; do fetch "$n" "$(url "$n")" "$REF"; done
+EXPERIMENTAL=()
+for n in "${CHOSEN_ORDER[@]}"; do
+  if [ "${GROUP[$n]}" = experimental ]; then
+    EXPERIMENTAL+=("$n"); fetch "$n" "$(url "$n")" master
+  else
+    fetch "$n" "$(url "$n")" "$REF"
+  fi
+done
 
-echo "External libraries (externals/):"
-# ADOdb and Smarty are patched forks tagged with each release, like the packages; HTMLPurifier is upstream's, pinned by its own tag.
-if [ "$REF" = master ]; then
-  fetch externals/adodb        https://github.com/lsces/ADOdb.git          v5.22.11-lsc
-  fetch externals/smarty       https://github.com/lsces/smarty.git         master
-  fetch externals/htmlpurifier https://github.com/ezyang/htmlpurifier.git  master
-else
-  fetch externals/adodb        https://github.com/lsces/ADOdb.git          "$REF"
-  fetch externals/smarty       https://github.com/lsces/smarty.git         "$REF"
-  fetch externals/htmlpurifier https://github.com/ezyang/htmlpurifier.git  v4.19.0
+if [ "$NOBASE" = 0 ]; then
+  echo "External libraries (externals/):"
+  # ADOdb and Smarty are patched forks tagged with each release, like the packages; HTMLPurifier is upstream's, pinned by its own tag.
+  if [ "$REF" = master ]; then
+    fetch externals/adodb        https://github.com/lsces/ADOdb.git          v5.22.11-lsc
+    fetch externals/smarty       https://github.com/lsces/smarty.git         master
+    fetch externals/htmlpurifier https://github.com/ezyang/htmlpurifier.git  master
+  else
+    fetch externals/adodb        https://github.com/lsces/ADOdb.git          "$REF"
+    fetch externals/smarty       https://github.com/lsces/smarty.git         "$REF"
+    fetch externals/htmlpurifier https://github.com/ezyang/htmlpurifier.git  v4.19.0
+  fi
 fi
 
+if [ ${#EXPERIMENTAL[@]} -gt 0 ]; then
+  echo
+  echo "NOTE: ${EXPERIMENTAL[*]} - experimental: not yet reviewed or adopted, not part of any release, fetched from master."
+fi
 echo
 echo "Done. Next: point a web root at this directory (a site symlinks the packages it needs) and run the installer in install/."

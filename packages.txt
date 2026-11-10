@@ -1,40 +1,45 @@
 # Packages of this bitweaver fork, one per line: name, group, then the packages it needs.
 #
-#   core      always fetched: bitweaver does not run without these
-#   default   fetched when no package is named: a basic site (wiki and image galleries)
-#   optional  fetched only when named on the command line (get-packages.sh blogs search)
+#   core          always fetched: bitweaver does not run without these
+#   default       fetched when no package is named: a basic site (wiki pages and image galleries)
+#   features      site features, each optional on its own: articles, blogs, boards, calendar, rss, search
+#   extensions    tidy functional extensions, each optional on its own: contact, food, health, stock, mapper
+#   media         the media management upgrade: needs contact, and both of its packages together to work
+#   experimental  not yet reviewed or adopted: never part of a release; fetched from master on request only
 #
-# "needs" is what each package declares itself with registerRequirements() in admin/schema_inc.php, so
-# naming a package also fetches what it needs. A package that declares nothing is marked "(none declared)".
+# core and default make the base download; features, extensions and media are add-on downloads that unpack over it.
+# "needs" is what each package declares itself with registerRequirements() in admin/schema_inc.php (plus the media pairing), so naming a
+# package also fetches what it needs. A package that declares nothing is marked "(none declared)".
 # config/ and storage/ are part of this wrapper repository itself and need no fetch.
 #
-# name          group     needs
+# name          group         needs
 kernel          core
 liberty         core
 users           core
 themes          core
 languages       core
-util            core      # (none declared)
-install         core      # (none declared)
-protector       core      # (none declared) registered as a required package
-ckeditor        core      # (none declared) the editor; the base page template includes its footer
+util            core          # (none declared)
+install         core          # (none declared)
+protector       core          # (none declared) registered as a required package
+ckeditor        core          # (none declared) the editor; the base page template includes its footer
 wiki            default
 fisheye         default
-articles        optional
-blogs           optional
-boards          optional
-calendar        optional
-contact         optional
-contactwiki     optional  contact
-fisheyemedia    optional  fisheye
-food            optional  contact
-health          optional
-mapper          optional  # (none declared)
-messages        optional  # (none declared)
-newsletters     optional
-nexus           optional  # (none declared) dropdown menus
-rss             optional  # (none declared) feeds, used by wiki and fisheye when present
-search          optional
-stats           optional  # (none declared)
-stock           optional  contact
-tags            optional
+articles        features
+blogs           features
+boards          features
+calendar        features
+rss             features      # (none declared) feeds, used by wiki and fisheye when present
+search          features
+contact         extensions
+food            extensions    contact
+health          extensions
+mapper          extensions    # (none declared)
+stock           extensions    contact
+contactwiki     media         contact fisheyemedia
+fisheyemedia    media         fisheye contact contactwiki
+feed            experimental  # (none declared) per-user activity feed over liberty's action log
+messages        experimental  # (none declared)
+newsletters     experimental
+nexus           experimental  # (none declared) dropdown menus
+stats           experimental  # (none declared)
+tags            experimental
