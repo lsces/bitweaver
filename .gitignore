@@ -5,7 +5,8 @@ config/css/
 config/fonts/
 config/iconsets/
 config/images/
-config/themes/
+config/themes/*
+!config/themes/BlueSky/
 
 # Packages (each has its own git repo)
 /articles/

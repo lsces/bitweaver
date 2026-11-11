@@ -147,6 +147,11 @@ templates through a search path that allows per-site overrides:
 This means dropping a template file into the site-specific path silently overrides the
 package default — useful for site-specific customisation without forking the package.
 
+A style (theme) lives in `config/themes/<name>/` and is chosen by the `style` setting. The release carries
+one, `config/themes/BlueSky/` (a Bootstrap 3 based colour theme), as the fallback that `default_style` names;
+further themes are meant to be separate optional packages that unpack into `config/themes/`. Its logo rule
+points at `config/images/logo.png`, which a site supplies.
+
 **Important Smarty conventions in this codebase:**
 
 - `{tr}...{/tr}` for user-visible strings (maps to `KernelTools::tra()`).
